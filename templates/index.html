@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResearchVault</title>
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+    
+    <div class="container" class="container-fluid">
+
+        <div class="navbar">
+            <img src="static/pics/logo.png">
+
+            <div class="right">
+                <a href="" id="home"><i class='bx bx-home-alt-2'></i>Home</a>
+                <a href="/browse" id="browse"><i class='bx bx-search' ></i>Browse</a>
+                <a href="/chatbot" id="chatbot"><i class='bx bx-chatbot' ></i>chatbot</a>
+                <a href="" id="notification"><i class='bx bx-bell' ></i>Notification</a>
+                <button id="login-button">LOGIN</button>
+                <button id="signup-button">SIGN-UP</button>
+                <button id="logout-button" class="hidden">LOGOUT</button>
+            </div>
+
+            <i class='bx bx-menu'id="menu-icon"></i>
+            
+        </div>
+
+        <div class="right-dropdown">
+            <a href="" id="home-dropdown"><i class='bx bx-home-alt-2'></i>Home</a>
+
+            <a href="" id="browse"><i class='bx bx-search' ></i>Browse</a>
+
+            <a href="" id="notification-dropdown"><i class='bx bx-bell' ></i>Notification</a>
+
+            <button id="login-button-dropdown">LOGIN</button>
+            <button id="signup-button-dropdown">SIGN-UP</button>
+            <button id="logout-button-dropdown">LOGOUT</button>
+        </div>
+
+        <div class="content">
+
+            <div class="socials">
+                <i class='bx bxl-instagram' ></i>
+                <i class='bx bxl-youtube' ></i>
+                <i class='bx bxl-facebook-circle' ></i>
+            </div>
+
+            <div class="texts">
+                <h1>ResearchVault</h1>
+
+
+                <div class="texts-text">
+                    <p>Revolutionaize your research with ResearchVault - the AI-powered</p>
+                    <p>platform that unlocks the full potential of your data.</p>
+                </div>
+                
+                <div class="texts-buttons">
+                    <button id="about">ABOUT</button>
+                    <button id="start">START NOW</button>
+                </div>
+            </div>
+
+            <div class="content-img-container">
+                <img src="static/pics/library.jpg">
+            </div>
+            
+
+        </div>
+
+    </div>
+
+    <div class="login-container hidden" id="login-container">
+
+        <div class="login-header">
+            <h1>Login</h1>
+            <i class='bx bx-x' id="close-login"></i>
+        </div>
+
+        <div class="login-content">
+            <input type="email" name="email" id="email-login" placeholder="Email" required>
+            <input type="password" name="password" id="password-login" placeholder="Password" required> 
+        </div>
+
+        <button id ='login'>LOGIN</button>
+        <p>Forgot password? <a href="/forget-password">click here!</a></p>
+    </div>
+
+    <div class="signup-container hidden" id ='signup-container'>
+
+        <div class="signup-header">
+            <h1>Sign Up</h1>
+            <i class='bx bx-x' id="close-signup"></i>
+        </div>
+
+        <div class="signup-contents">
+            <div class="top">
+                <input type="text" required placeholder="Last Name">
+                <input type="text" required placeholder="First Name">
+            </div>
+
+            <div class="bottom">
+                <input type="email" name="email" id="email-signup" required placeholder="Email">
+                <input type="password" name="password" id="password-signup" pattern=".{8,}" required placeholder="Password">
+            </div>
+        </div>
+
+        <button class="get-started">GET STARTED</button>
+    </div>
+
+    <div class="poc-container"  style="display: none;">
+        <div class="poc-wrapper">
+          <a href="/doc"><button id='poc-create'>CREATE</button></a>
+          <a href="/publish"><button id='poc-publish'>PUBLISH</button></a>
+        </div>
+      </div>
+    
+
+    <script src="static/js/script.js"></script>
+</body>
+</html>

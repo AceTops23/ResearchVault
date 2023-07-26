@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/fp.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <title>ResearchVault</title>
+</head>
+<body>
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="navbar">
+                    <div class="left">
+                        <img src="static/pics/logo.png">
+                    </div>
+                    <div class="right">
+                        <input type="email" id="fp-email" placeholder="Email">
+                        <input type="password" id="fp-password" placeholder="Password">
+                        <button id="fp-login" class="btn btn-primary btn-no-outline">Login</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="fp-container">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-12 col-md-12">
+                    <div class="text-center">
+                        <div class="top">
+                            <h1>Forgot Password?</h1>
+                        </div>
+                        <hr>
+                        <div class="med">
+                            <p>Please enter your email to search for your account.</p>
+                            <input type="email" id="fp-forgot-email" placeholder="Email" required>
+                        </div>
+                        <hr>
+                        <div class="bottom-buttons">
+                            <button id="fp-cancel" class="btn btn-secondary">Cancel</button>
+                            <button id="fp-search" class="btn btn-primary btn-no-outline">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="static/js/fp.js"></script>
+</body>
+</html>

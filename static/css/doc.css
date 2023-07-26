@@ -1,0 +1,112 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+body{
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+button#comment{
+    position: absolute;
+    right: 100px;
+    top: 10px;
+    font-size: 30px;
+    padding: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+}
+
+button#back{
+    position: absolute;
+    left: 50px;
+    top: 10px;
+    font-size: 30px;
+    padding: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+}
+
+button#save{
+    position: absolute;
+    right: 50px;
+    top: 10px;
+    font-size: 30px;
+    padding: none;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background-color: white;
+    border: none;
+}
+
+.comment-section{
+    position: absolute;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #b3aeae;
+    width:15%;
+    height: 700px;
+    padding: 20px;
+    overflow: auto;
+    display: none;
+    background-color: white;
+}
+
+.comment-upper{
+    display: flex;
+}
+
+.comment-part{
+    flex: 1;
+}
+.comment-upper button{
+    font-size: 30px;
+    background-color: white;
+    border: white;
+    margin-left: 140px;
+    cursor: pointer;
+}
+#main-container{ 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E0E0E0;
+    background-color: #F4f4f4;
+    margin: 50px;
+}
+
+#toolbar{
+    max-width: 100%;
+    width: 10000px;
+    background-color: white;
+}
+
+#editor-container {
+    padding: 10px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 100%;
+    height: 1000px;
+  }
+
+#editor {
+    width: 842px;
+    background-color: white;
+    padding: 72px;
+  }
