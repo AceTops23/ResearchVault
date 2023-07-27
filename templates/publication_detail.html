@@ -8,19 +8,21 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/publication_detail.css') }}">
 </head>
 <body>
-    <i class='bx bx-arrow-back'></i>
-    <div class="container-fluid">
-        <div class="publication-detail">
-            
-            <h2>{{ item.title }}</h2>
-            <p>Publication Year: {{ item.year }}</p>
-            <p>Authors: {{ item.authors }}</p>
-            <p>Thesis Advisor: {{ item.thesisAdvisor }}</p>
-            <p>Department: {{ item.department }}</p>
-            <p>Degree: {{ item.degree }}</p>
-            <p>Subject Area: {{ item.subjectArea }}</p>
-            <p>Abstract: {{ item.abstract }}</p>
+    <a href="/browse"><i class='bx bx-chevron-left'></i></a>
+    <div class="container" class="blur-container" id="container"> 
 
+        <div class="publication-detail">
+
+            <div class="details">
+                <h2>{{ item.title }}</h2>
+                <p>Publication Year: {{ item.year }}</p>
+                <p>Authors: {{ item.authors }}</p>
+                <p>Thesis Advisor: {{ item.thesisAdvisor }}</p>
+                <p>Department: {{ item.department }}</p>
+                <p>Degree: {{ item.degree }}</p>
+                <p>Subject Area: {{ item.subjectArea }}</p>
+                <p>Abstract: {{ item.abstract }}</p>
+            </div>
             <!-- Buttons -->
             <div class="buttons">
                 <button onclick="togglePdfViewer()">View PDF</button>
@@ -33,10 +35,38 @@
                 This browser does not support PDFs. Please <a href="{{ url_for('serve_pdf', filename=item.file_path) }}">download the PDF</a> to view it.
             </object>
         </div>
-        <div id="apa-citation-container" class="apa-citation-container hidden"></div>
+    </div>
+
+    <div id="apa-citation-container" class="apa-citation-container hidden">
+       
     </div>
 
     <script>
+
+const container = document.getElementById('container');
+const apaButton = document.getElementById('apa-button');
+const apaContainer = document.getElementById('apa-citation-container');
+
+apaButton.addEventListener('click', function(event) {
+  event.stopPropagation(); // Prevent the click event from propagating to the document
+  apaContainer.classList.toggle('hidden');
+  container.classList.toggle('blur');
+});
+
+apaContainer.addEventListener('click', function(event) {
+  event.stopPropagation(); // Prevent click events on apaContainer from propagating to the document
+});
+
+document.addEventListener('click', function(event) {
+  if (!apaContainer.contains(event.target)) {
+    // Clicked outside the apaContainer, so hide the popup and remove the blur
+    apaContainer.classList.add('hidden');
+    container.classList.remove('blur');
+  }
+});
+
+      
+
         function togglePdfViewer() {
             var pdfViewer = document.getElementById('pdfViewer');
             pdfViewer.style.display = (pdfViewer.style.display === 'none') ? 'block' : 'none';

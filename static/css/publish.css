@@ -11,6 +11,21 @@ body{
     height: 100vh;
 }
 
+a{
+    text-decoration: none !important;
+    color: black !important;
+}
+
+i{
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+
+
 .container{
     color: white;
     padding: 20px;

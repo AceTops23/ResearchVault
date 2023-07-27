@@ -22,17 +22,18 @@ header{
 
 .chatbot-navbar{
     display: flex;
-    gap: 15px;
+    gap: 50px;
+    letter-spacing: 3px;
 }
 
-.bx-arrow-back{
+.bx-chevron-left{
     font-size: 25px;
     cursor: pointer;
 }
 
 a{
     text-decoration: none !important;
-    color: white !important;
+    color: black !important;
   }
  
 

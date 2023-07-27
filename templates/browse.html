@@ -16,8 +16,7 @@
             <div class="browse-right">
                 <a href="/" id="home-browse"><i class='bx bx-home-alt-2'></i>Home</a>
                 <a href="/browse" id="browse-browse"><i class='bx bx-search' ></i>Browse</a>
-                <a href="/chatbot" id="chatbot-browse"><i class='bx bx-bot'></i></i>chatbot</a>
-                <a href="" id="notification-browse"><i class='bx bx-bell' ></i>Notification</a>
+                <a href="/chatbot" id="chatbot-browse"><i class='bx bx-bot'></i></i>Chatbot</a>
             </div>
         </div>
 
@@ -81,8 +80,8 @@
                               <div class="col-md-10">
                                 <div class="col-md-10">
                                     <div class="browse-result d-flex flex-column">
-                                        <input type="search" id="search-input" placeholder="Search" value="{{ search_query }}">
-                                        <button type="submit" id="search-button">Search</button>
+                                        <input type="search" id="search-input" placeholder="SEARCH" value="{{ search_query }}">
+                                        <button type="submit" id="search-button">SEARCH</button>
                                         {% for item in items %}
                                         <a class="browse-item" href="{{ url_for('publication_detail', item_id=item.id) }}" data-subjectArea="{{ item.subjectArea }}">
                                             {{ item.title }} - {{ item.year }}
