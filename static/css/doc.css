@@ -52,16 +52,23 @@ button#save{
 
 .comment-section{
     position: absolute;
-    right: 0;
+    top: 5px;
+    right: 5px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #b3aeae;
+    border-radius: 8px;
     width:15%;
     height: 700px;
     padding: 20px;
     overflow: auto;
     display: none;
     background-color: white;
+    box-shadow: 0 1px 25px rgba(0,0,0,0.2);
+    transition: all 0.3s linear;
+}
+
+#comment-exit{
+    transition: all 0.3s linear;
 }
 
 .comment-upper{
