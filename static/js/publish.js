@@ -72,3 +72,17 @@ function updateYearInputValue() {
 
 // Attach the updateYearInputValue function to the change event of the month input
 document.getElementById('publicationDate').addEventListener('change', updateYearInputValue);
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  var uoacontainer = document.getElementById('uoa-container');
+  var submitButton = document.getElementById('submit-publish');
+
+  submitButton.addEventListener('click', function() {
+    uoacontainer.classList.add('hidden'); // Hide the login container
+  });
+
+  submitButton.addEventListener('click', function() {
+    uoacontainer.classList.remove('hidden'); // Show the login container
+  });
+});

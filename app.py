@@ -132,7 +132,6 @@ def publish():
     """Route for rendering the upload form"""
     return render_template("publish.html")
 
-
 @app.route("/chatbot")
 def chatbot():
     """Route for rendering the chatbot form"""
@@ -143,6 +142,11 @@ def chatbot():
 def doc():
     """Route for the documentation page"""
     return render_template('doc.html')
+
+@app.route("/edit")
+def edit():
+    """Route for rendering the unapprove docx"""
+    return render_template("edit.html")
 
 
 @app.route("/api", methods=["POST"])
