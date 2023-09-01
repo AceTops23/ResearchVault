@@ -65,26 +65,20 @@ $(document).ready(function() {
 
 // Function to update the year input value without the month
 function updateYearInputValue() {
-  const monthInput = document.getElementById('publicationDate');
+  const monthInput = document.getElementById('yearInput');
   const year = monthInput.value.slice(0, 4); // Extract the year from the input value
   monthInput.value = year;
 }
 
 // Attach the updateYearInputValue function to the change event of the month input
-document.getElementById('publicationDate').addEventListener('change', updateYearInputValue);
+  document.getElementById('yearInput').addEventListener('change', updateYearInputValue);
 
 
-const submitButton = document.getElementById('submit-publish');
-const pocContainer = document.getElementById('poc-container');
-
-submitButton.addEventListener('click', function(event) {
-  pocContainer.classList.toggle('hidden');
-});
-
-document.addEventListener('click', function(event) {
-  if (!pocContainer.contains(event.target)) {
-    // Clicked outside the apaContainer, so hide the popup and remove the blur
-    pocContainer.classList.add('hidden');
-  }
-});
-
+  const submitButton = document.getElementById('submit-publish');
+  const pocContainer = document.getElementById('poc-container');
+  
+  submitButton.addEventListener('click', function(event) {
+    console.log('clicked');
+    pocContainer.classList.toggle('hidden');
+  });
+  

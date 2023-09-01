@@ -136,4 +136,5 @@ textarea::placeholder{
     background: #C6F8E5 !important;
     color: black !important;
     border: none;
+    cursor: pointer;
 }
