@@ -74,15 +74,17 @@ function updateYearInputValue() {
 document.getElementById('publicationDate').addEventListener('change', updateYearInputValue);
 
 
-document.addEventListener('DOMContentLoaded', function() {
-  var uoacontainer = document.getElementById('uoa-container');
-  var submitButton = document.getElementById('submit-publish');
+const submitButton = document.getElementById('submit-publish');
+const pocContainer = document.getElementById('poc-container');
 
-  submitButton.addEventListener('click', function() {
-    uoacontainer.classList.add('hidden'); // Hide the login container
-  });
-
-  submitButton.addEventListener('click', function() {
-    uoacontainer.classList.remove('hidden'); // Show the login container
-  });
+submitButton.addEventListener('click', function(event) {
+  pocContainer.classList.toggle('hidden');
 });
+
+document.addEventListener('click', function(event) {
+  if (!pocContainer.contains(event.target)) {
+    // Clicked outside the apaContainer, so hide the popup and remove the blur
+    pocContainer.classList.add('hidden');
+  }
+});
+
