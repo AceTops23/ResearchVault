@@ -68,10 +68,12 @@
 
 
     <div class="poc-container hidden" id = 'poc-container'>
+        <form action="/submit_data" method="post" enctype="multipart/form-data" id="unapprove-form">
           <button id="unapprove-publish" class="btn btn-primary flex-grow-1">UNAPPROVE</button>
-        <form action="/submit_data" method="post" enctype="multipart/form-data" id="publish-form">
+        </form>
+        <form action="/submit_data" method="post" enctype="multipart/form-data" id="approve-form">
           <button id="approve-publish" class="btn btn-primary flex-grow-1">APPROVE</button>
-      </form>
+        </form>
     </div>
 
 
