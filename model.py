@@ -1,21 +1,61 @@
-import spacy
-from spacy.training.example import Example
+import pandas as pd
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+import joblib
+from gensim import corpora, models
+from nltk import ne_chunk
 
-# Load a pre-trained model or create a blank model
-nlp = spacy.load("en_core_web_sm")
-# OR: nlp = spacy.blank("en")
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('maxent_ne_chunker')
+nltk.download('words')
 
-# Define your custom component (section detection) and add it to the pipeline
-section_detection = nlp.create_pipe("ner")
-nlp.add_pipe(section_detection)
 
-# Load your annotated data (e.g., from a JSON file)
-training_data = [
-    ("Introduction is the first section.", {"entities": [(0, 12, "SECTION")]}),
-    # Add more annotated examples
-]
+def load_datasets(csv_files):
+    dfs = []
+    for csv_file in csv_files:
+        df = pd.read_csv(csv_file, encoding='Windows-1252')
+        dfs.append(df)
+    return pd.concat(dfs, ignore_index=True)
 
-<<<<<<< HEAD
+def preprocess_text(text):
+    if isinstance(text, str):
+        stop_words = set(stopwords.words('english'))
+        stemmer = PorterStemmer()
+        
+        words = nltk.word_tokenize(text)
+        
+        processed_words = []
+        for word in words:
+            if word.isnumeric():
+                processed_words.append("NUMERIC")
+            else:
+                stemmed_word = stemmer.stem(word)
+                pos_tag = nltk.pos_tag([stemmed_word])[0][1]
+                if pos_tag.startswith('NN'):
+                    processed_words.append(stemmed_word)
+        
+        filtered_words = [word for word in processed_words if word.lower() not in stop_words]
+
+        # Named Entity Recognition
+        named_entities = ne_chunk(nltk.pos_tag(filtered_words))
+        named_entities_filtered = [ne[0] if isinstance(ne, tuple) else ne for ne in named_entities]
+        
+        named_entities_str = [ne if isinstance(ne, str) else ne[0] for ne in named_entities_filtered if isinstance(ne, (str, tuple))]
+        
+        return " ".join(named_entities_str)  # Convert list of tokens to string
+    else:
+        return ""
+
+
+
+
 if __name__ == "__main__":
     # Step 2: Prepare the datasets
     csv_files = ['dataset/A SYLLABUS GENERATOR FOR THE COLLEGE.csv', 'dataset/A Web-based Announcement Management System via SMS for the College of Computer Studies.csv', 'dataset/Anonymous Restriction Application Using AES Algorithm.csv', 'dataset/Book1AFScan Android File Scanner and Translator with Optical.csv', 'dataset/CCS InfoCast- An Information Dissemination.csv',
@@ -41,20 +81,37 @@ if __name__ == "__main__":
                  'dataset/CAIHRMS-COMPUTER-AIDED-INSTRUCTION-FOR-HOTEL-RESERVATION-MANAGEMENT-SYSTEM.csv', 'dataset/Book1THEREPO-A-Thesis-Repository-Android-Based-Application.csv', 'dataset/Book1HR-Online-An-Online-Human-Resource-Management-Information-System-of-Laguna-State-Polytechnic-University-Santa-Cruz-Campus.csv', 'dataset/BAT-Budget-Office-Accounting-Office-Treasury-Office-Monitoring-Record-Management-System-of-Municipality-of-Sta.-Cruz-Laguna.csv', 
                  'dataset/BAT-Budget-Office-Accounting-Office-Treasury-Office-Monitoring-Record-Management-System-of-Municipality-of-Sta.-Cruz-Laguna.csv', 'dataset/AUTOMATED-CANTEEN-TRANSACTION-AND-GATE-PASS-MONITORING-USING-RFID-OF-ST.-MARYS-MONTESSORI.csv', 'dataset/AUGMENTED-ELEMENT-AN-INTERACTIVE-AUGMENTED-REALITY-GAME-OF-ELEMENTS.csv', 'dataset/ASADO-AUTOMATED-STUDENT-FILE-AND-DOCUMENT-ORGANIZER.csv', 'dataset/ADVANCE-LEARNING-FOR-CCS-SCC-USING-AR-AND-MODULE-SUPPORT.csv']
     df = load_datasets(csv_files)
-=======
-# Convert the training data into Example objects
-examples = []
-for text, annotations in training_data:
-    example = Example.from_dict(nlp.make_doc(text), annotations)
-    examples.append(example)
->>>>>>> parent of b876eff (up)
 
-# Train the model
-n_iter = 10  # Adjust the number of training iterations as needed
-for _ in range(n_iter):
-    for example in examples:
-        nlp.update([example], losses={})
+    # Step 3: Data Preprocessing
+    df["preprocessed_text"] = df["Text"].apply(preprocess_text)
 
-# Save the trained model
-output_dir = "path_to_output_directory"
-nlp.to_disk(output_dir)
+    # Step 4: Drop rows with missing values
+    df.dropna(subset=["preprocessed_text", "Label"], inplace=True)
+
+    # Step 5: Topic Modeling
+    texts = df["preprocessed_text"].tolist()
+    tokenized_texts = [text.split() for text in texts]  # Tokenize the preprocessed text
+    dictionary = corpora.Dictionary(tokenized_texts)
+    corpus = [dictionary.doc2bow(tokens) for tokens in tokenized_texts]
+
+    lda_model = models.LdaModel(corpus, id2word=dictionary, num_topics=5, passes=15)
+
+    # Step 6: Feature Extraction using TF-IDF
+    vectorizer = TfidfVectorizer()
+    preprocessed_texts = df["preprocessed_text"].tolist()  # List of preprocessed text strings
+    X = vectorizer.fit_transform(preprocessed_texts)  # Apply TfidfVectorizer to the list of strings
+    y = df["Label"]
+
+    # Step 7: Model Training
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+    classifier.fit(X_train, y_train)
+
+    # Step 8: Evaluation
+    y_pred = classifier.predict(X_test)
+    report = classification_report(y_test, y_pred)
+    print(report)
+
+    # Step 9: Saving the Model
+    joblib.dump(classifier, 'trained_model_with_tfidf.joblib')
+
