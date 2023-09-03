@@ -1,0 +1,130 @@
+Text,Label
+"In our world, technology has the greatest effect in education, medicine, 
+transportation, entertainment, and other fields all benefit from technological 
+advancements. It is used by people to reduce the amount of work they do as well as 
+the amount of money they make. Technology is significant in everyone's life because 
+of its daily use as a means of transaction, machines, and innovation such as cell 
+phones, tablets, and computers that are useful to everyone in terms of communication, 
+learning, and teaching.
+The National Service Training Program (NSTP) of Laguna State Polytechnic 
+University Sta. Cruz Campus (LSPU SCC) was headed by Mr. Mario C. Pasion Ed. 
+D. as the Chairperson and Mr. Jethro N. Austria Ed. D. the Reserve Officer’s Training 
+Corps Unit (ROTCU) in the university. 
+Since the number of students enrolled in the said subject is increasing, 
+according to the researchers' interview, the Reserve Officers Training Corps (ROTC) 
+has 800-1000 students enrolled, and the Civic Welfare Training Service (CWTS) has 
+1200 students enrolled, the management must manage the students' records. The 
+management is having problems maintaining the students' records, especially on the 
+registration due to its lost and misplaced. Due to a lack of a proper database system 
+that can handle all of the records securely, old files such as lists of students who 
+graduated from the National Service Training Program (NSTP) and Reserve Officers' 
+Training Corps (ROTC) are being discarded.
+The management continues to use a manual method to document student 
+information and results, as well as attendance and production. Following that, they would encrypt all of the information using excel on a single computer run by a single 
+person, which will take time to document all of the information of all of the students 
+participating in the NSTP and ROTC Unit. Thus, the proponents suggested a system 
+that entitled” NSTP Web Portal Student Information Management System with Auto 
+Generated QR Code ” that includes a system that can records information that can 
+lessen the time in recording data, a system that can help them easily trace the needed 
+information to generate reliable information on time.
+Due to the circumstances, the researchers devised a solution for the NSTP 
+office's problem called ""LSPU-NSTP Student Record Management System,"" which 
+deals with all types of student information, academic records, college information, 
+course information, curriculum, batch information, and other resource-related 
+information. It keeps track of a student's information from day one to the end of the 
+course, which can be used for monitoring, attendance tracking, course progress, 
+completed semester years, upcoming semester year curriculum details, test details, 
+project or other related events, and final exam results; all of this information can be 
+used for future references. The main goal of this software framework is to aid in the 
+creation and production of a better performance for the existing National Service 
+Training Program (NSTP) system at the Laguna State Polytechnic University Sta. 
+Cruz Campus. This type of system can become more successful over time in 
+collecting data and ensuring that it is maintained for obvious reasons such as 
+preventing student complaints during online registration and displaying an Auto 
+Generated QR code that tracks student attendance.
+",Introduction
+"The National Service Training Program (NSTP), also known as Republic Act 
+9163 or the NSTP Act of 2001, is a law that aims to improve civic awareness and defense preparedness in youth by improving their service ethics and patriotism while 
+receiving training in any of the three program components, the (1) Civic welfare 
+training service (CWTS) is a program designed to increase students' civic awareness 
+by instilling in them the importance of service and dedication to the welfare and 
+betterment of all community members. (2) Reserve Officer’s Training Corps (ROTC) 
+in the Philippines is one of three components of the National Service Training 
+Program, the civic education and defense preparedness program for Filipino college 
+students. (3) Literacy Training Service (LTS). 
+The LSPU-NSTP is a Laguna State Polytechnic University Sta. Cruz Main 
+Campus (LSPU-SCC) extracurricular mandated program located in Brgy. Bubukal 
+Sta. Cruz, Laguna. This curriculum focuses on preparation and closely tracks each 
+student's attendance as well as uniform fees. Students will be given a registration form 
+by the officer in charge in order to be officially enrolled. If a student misses three 
+days of formation, he or she will be dropped from the subject unless there is a fair 
+excuse. Furthermore, due to the office's procedure, officers are still having difficulty 
+keeping track of their attendance. By writing the name and course on a piece of paper, 
+the appointed officer will keep track of attendance.
+Mr. Mario C. Pasion, Ed.D., Chairperson of the National Service Training 
+Program (NSTP) at Laguna State Polytechnic University Santa Cruz Campus (LSPU 
+SCC), and Mrs. Nori, Mr. Pasion's secretary and the office in charge in CWTS, Mr. 
+Jethro N. Austria Ed. D. were interviewed by the researchers. The Reserve Officers' 
+Training Corps (ROTC) Unit at Laguna State Polytechnic University Sta. Cruz
+Campus (LSPU SCC) Admin stated that the ROTC and CWTS management are still 
+using the manual method of manually encoding data into Microsoft Excel. As a result, 
+the researchers described the study's overall problem: how to have a framework.
+",Method
+"Population of the Study
+The respondents of the study comprised of the students of the LSPU NSTP at 
+Sta Cruz (Main) Campus. Respondents were selected through Quota sampling. As 
+stated by Aprameya (2016) Quota sampling is a sampling method that is a non probabilistic method where the survey population is being divided into mutually 
+exclusive subgroups. People in each subgroup are thus not in random, they were 
+selected by the researcher or interviewer who is conducting the survey.
+The respondents of the study were taken from the Students, Cadets Officer, 
+CWTS office, NSTP Chairperson, ROTC Unit Office. These respondents know about 
+the problems associated in this study. They could help the proponents with extra 
+assess of the collected data. The table shows how the researchers computed the 
+percentage and frequency of their respondents.Data Collection Method
+To collect all information from all relevant sources on how the proponents 
+find the answers to the research problem, design, and evaluate the outcomes; the 
+following methods were used by the researchers to make study feasible:
+Interview
+On the 5th day of March, the proponents conducted an interview at Laguna 
+State Polytechnic University Sta. Cruz. Laguna with Mr. Jethro Austria, the cadets 
+officer, Mr. Mario C. Pasion and his secretary for gathering information needed in 
+making the proposed system to give some viewpoint and understanding about the 
+current manual process of managing grading sheet, student information. The 
+proponents determine the specific problem of the client and possible solution with it.
+Internet Research 
+ Since it has a large collection of information that is accessible anytime the 
+proponents used internet. The proponents read some previous journals, articles and 
+published thesis to gather different information associated to the propose study 
+through visiting websites such as science direct, Google scholars, plus groups etc,
+Library Research
+ The proponents read previous study, thesis and books at Laguna State 
+Polytechnic University-Santa Cruz Campus’s Library on March 6, 2020 in order to 
+have a vision and idea on the layout in the development of the system. 
+Expert Consultant
+ The knowledge of the people who have expertise in fields that the researchers 
+will undertake can greatly help in gathering data raw data. The opinions and 
+constructive criticism of people will undoubtedly assist the researchers. One of the 
+best ways to further improve anything is to make sure to ask for advice or help from 
+people who know more than him.
+Observation 
+Observation is a useful fact finding technique that the researchers can employ 
+in undertaking the research. Observation requires the researchers to see the different 
+problem of the current method and provide the solution to fix or improve the current 
+method for the benefit of those people who are using the current method.",Result
+"This chapter presents the result of the survey questionnaire that was done in 
+the implementation phase. It also discussed how the study achieves the research 
+objectives.
+Research Objectives
+The management is having problems maintaining the students' records, 
+especially on the registration due to its lost and misplaced. Due to a lack of a proper 
+database system that can handle all of the records securely, old files such as lists of 
+students who graduated from the National Service Training Program (NSTP) and 
+Reserve Officers' Training Corps (ROTC) are being discarded and also the 
+management continues to use a manual method to document student information and 
+results, as well as attendance and production.
+The study aims to develop and assess the User Acceptance Testing (UAT) on 
+an automated system that handles online registration. The Study aims to design and 
+develop a Web Portal Student Information Management System that will help the 
+NSTP (National Service Training Program) to have an automated system for 
+registration, managing the student’s information and heaving an Auto Generated QR 
+code that monitor the attendance of the students.",Discussion

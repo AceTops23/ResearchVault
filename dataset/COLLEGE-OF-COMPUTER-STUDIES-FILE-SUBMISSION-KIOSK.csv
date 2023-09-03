@@ -1,0 +1,127 @@
+Text,Label
+"The innovation of technology is advancing constantly in the different
+fields of industry. Its continuous change helps people do their job faster and 
+people can focus more on the important factors in life. Technology helps them 
+improve the way they live and the way they can perform their task as efficient 
+as possible. It also helps the people save more of their time and energy which 
+mean they can do more in creating a technology that can enhance other task 
+that are usually done by humans. Technology is very significant in everyone’s 
+life because it benefits more in their life.
+The continuous growth of technology leads from the old machineries 
+into new ones. Social Medias on the other way around also improves its 
+features which makes people’s lifestyle easy. Through the use of internet,
+people can stay connected to the world. One of its best features is how 
+people can send files instantly with just a click of a button. 
+However, sending files without the use of internet requires a faster 
+response. Like for example in schools or universities, if a student have to 
+send a file or task is given to them, they can either look for the professor or 
+teacher or just put it on his/her desk. The advantage of staying connected with 
+the internet is that you can send file as easy as it can be. You just have to 
+attach the file and click send and you have your file sent to its designated 
+receiver. It also have its time and date in case a person wants to check what 
+time or date a person sent a file.
+Technology has its endless improvement, humans will continue to 
+upgrade the old generation into a new, modern and technology-like 
+generation. Like Kiosk, people create technology that is very useful to the 
+environment and awareness. Kiosk is a small structure that provides 
+information and services on a computer screen. Kiosks let users interact and 
+include touch screens, sound, and motion video. A number of companies 
+specialize in creating multimedia kiosks. A simple kiosk can be created 
+using HTML pages and graphics, setting the type size large enough to attract
+people from a short distance, and removing the Web browser's tool bar so 
+that the display screen is effectively in ""kiosk mode."" The presentation can be 
+designed to simply loop through a series of pages or to allow user interaction 
+and exploration.
+The Laguna State Polytechnic University – Sta.Cruz, Campus, College 
+of Computer Studies (CCS) are currently experiencing conflicts when it comes 
+to sending files like projects or any kinds of printouts and paper works which 
+results to frustrations of professors when it comes to its deadlines. The idea of 
+the study is to send files through a kiosk within the College of Computer 
+Studies. The Kiosk will print a receipt that will serve as evidence of the time 
+and date and to whom professor it is for.
+The researcher’s goal of sending files through a kiosk is to avoid 
+circumstances with time and deadlines as well as to lessen the exhausted 
+way and time consuming way of sending files and provide a more user friendly system and manipulate it with ease.
+The general objective of the study was to develop a kiosk with regards 
+to sending files that can give the students an effortlessness in sending their 
+projects or requirements together with the exact time and date that they 
+passed it as well as to whom professor it is for. The researcher come up with
+the title; “College of Computer Studies File Submission Kiosk” that mainly 
+uses an All-in-One Touchscreen Monitor, Thermal Printer, Barcode Scanner, 
+Arduino Uno with Servo Motor and a broadband stick together with an 
+improvise Kiosk.",Introduction
+"The modernization of generation also leads to technologies 
+innovations. These new technologies helps people in different aspects of their 
+life. It helps them do their task easily and it also helps them to develop an 
+even greater technology for the generation to use in a more advanced way. 
+One technology that adapts from the older development of file submission is 
+the “CCS File Submission Kiosk”.
+The research project entitled; “CCS File Submission Kiosk” was 
+intended to keep the submission of files organized. It is a computer system 
+that gathers files from the students that needs to be sent to the designated 
+professors. This computer system benefits more to the CCS students as well 
+as their professors.
+The study was made to have a hassle-free sending files by using a 
+kiosk technology. Students who are currently enrolled will have to register in 
+order to use the technology. They will provide their own username and 
+password in order to access the system. They will have to choose which 
+professor they are sending it to and then click “Submit”. The system will both 
+send an SMS notification to the professor that it has been sent, and prints the 
+first copy of receipt for the receiver. Hard copy of files should be inserted 
+inside an envelope before attaching the receipt. When the receipt has been 
+attached, the file is now ready to be inserted inside the kiosk. But before it 
+completely falls down to the storage of the files inside the kiosk, it will be 
+prevented to fall before dropping down because of the lock on the edge of the 
+tray of the kiosk, the purpose of this is to give the barcode scanner an ample 
+time to read the barcode that was generated by the printer. The purpose of 
+this is to give the barcode scanner enough time to scan the barcode that was 
+generated by the printer and to reassure that a student sent a file. When the 
+scanner scans the barcode, the lock will eventually open or will rotate for 10 
+seconds so the file can finally drop down, and then, the printer prints the 
+second copy of receipt for the sender’s copy. This computer system 
+technology is proposed to avoid time conflicts as well as to save time and 
+energy.
+The College of Computer Studies often experience time or deadline 
+conflicts for the teachers while students consumes time looking for their 
+professors, deciding if they are going to place it in their professors desk or 
+look for them within the department or the university. These often leads to
+experiencing difficulties in having proofs that they passed their projects on the 
+right time. With the help of this study, sending files became hassle-free.
+The project targets to answer the following questions: (1) How to 
+develop a system that will help the Dean from the CCS in the automation of 
+the process? (2) How to develop and design a software that will best 
+complement the hardware? (3) How to integrate the hardware and software to 
+be able to improve the process of sending file through a kiosk? (4) How to 
+determine the satisfactoriness of the project in terms of; Quality Factors, 
+Perceived of Ease of Use, Experience, Actual Use. (5) How to evaluate the 
+overall performance of the system based on the above criteria.",Method
+"In order to gather several information for the continuous development 
+of the project, some methods needs to be done. The following methods are 
+the ones that was performed by the researcher to collect data, strengthen 
+facts and to help the researcher support the development of the study.
+Observation
+Before undergoing the construction of the project, the researcher first 
+held an observation about it. Through this, method the researcher found out 
+several problems that the students as well as the professors encounter when 
+it comes to sending their files. 
+Additionally, with the information the researcher have gathered, the
+concept and ideas to make the study much reliable and understandable.
+Library Research
+Library research was also done to gather additional information for 
+more relevant sources and basis of the system. It helped the researcher
+support the project and added more features that helped the system become
+possible.
+Internet Research
+Research on the internet also needs was performed in order to support 
+and strengthen the ideas and concepts and also to include secondary 
+information and ideas. Questionnaire
+Fact-Finding Technique was used by the researchers to collect data 
+and other information through questionnaires and feedbacks. The hardware 
+as well as the software involved in the study was tested and evaluated by the 
+students and professors of CCS. After testing and implementing, the 
+researcher gave out a set of questions in a questionnaires to the students so 
+that their answer could identify how effective and useful this study will be.",Result
+"This chapter presents the presentations and the detailed analysis of the 
+data gathered as well as the interpretation of the data pertaining to the 
+research problems, which this study investigated.
+",Discussion
