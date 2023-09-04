@@ -22,10 +22,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return; // Stop form submission if any field is missing
     }
 
-    // Check if the selected file is a PDF
-    if (file.type !== "application/docx") {
-      alert("Please select a word file.");
-      return; // Stop form submission if the file is not a PDF
+    // Check if the selected file is a DOCX
+    if (file.type !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      alert("Please select a DOCX file.");
+  return; // Stop form submission if the file is not a DOCX
     }
 
     const formData = new FormData();
