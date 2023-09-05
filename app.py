@@ -4,21 +4,30 @@ This module contains the Flask application for your project.
 It handles routes, templates, and database connections.
 """
 import os
-import re
 import secrets
-import io
 import openai
 import spacy
+import io
+import torch
+import tempfile
+from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PageObject
+from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from docx import Document
-from docx.shared import Pt
+from transformers import BertTokenizer, BertForSequenceClassification
 import PyPDF2
-from fpdf import FPDF
 from flask import Flask, render_template, request, jsonify, session, send_file
-from werkzeug.utils import secure_filename
 from db_connection import DBConnection
+
+# Load the BERT model and tokenizer
+model_path = "Models\BERT Model" 
+tokenizer = BertTokenizer.from_pretrained(model_path)
+bert_model = BertForSequenceClassification.from_pretrained(model_path)
+
+# Mapping of section indices to section names
+section_names = {0: "Introduction", 1: "Method", 2: "Result", 3: "Discussion"}
 
 app = Flask(__name__)
 
@@ -260,100 +269,133 @@ def serve_pdf(filename):
     pdf_path = os.path.join('uploads', filename)
     return send_file(pdf_path, mimetype='application/pdf')
 
-def extract_sections_from_text(text):
-    # Load the spaCy NLP model for English (or your desired language)
-    nlp = spacy.load("en_core_web_sm")
-
-    # Process the extracted text using spaCy to extract sections
-    doc = nlp(text)
-
-    # Create a dictionary to store the extracted sections
-    sections = {}
-
-    # Define the section names you want to extract (e.g., "Introduction", "Methods", etc.)
-    section_names = ["Introduction", "Methods", "Results", "Discussion"]
-
-    # Loop through each sentence in the document
-    for sentence in doc.sents:
-        # Check if the sentence starts with one of the section names
-        for section_name in section_names:
-            if sentence.text.startswith(section_name):
-                # Store the section content in the dictionary
-                sections[section_name] = sentence.text
-                break
-
-    return sections
-
-def extract_text_from_pdf(file_path):
-    # Load the spaCy NLP model for English (or your desired language)
-    nlp = spacy.load("en_core_web_sm")
-
-    with open(file_path, 'rb') as pdf_file:
-        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
-        text = ""
-        for page_num in range(pdf_reader.getNumPages()):
-            page = pdf_reader.getPage(page_num)
-            text += page.extract_text()
-
-        # Process the extracted text using spaCy to enhance extraction quality
-        doc = nlp(text)
-        return doc.text
-
-
+# Define a function called 'convert_to_imrad' that takes a 'file_path' as input.
 def convert_to_imrad(file_path):
-    # Load the spaCy NLP model for text extraction
-    nlp = spacy.load("en_core_web_sm")
+    try:
+        # Print a message to indicate the start of PDF content processing.
+        print("Reading and preprocessing the PDF content...")
+        
+        # Open the PDF file in binary read mode ('rb').
+        with open(file_path, "rb") as f:
+            
+            # Create a PDF reader object.
+            pdf_reader = PdfFileReader(f)
+            
+            # Initialize an empty string to store the extracted PDF text.
+            pdf_text = ""
+            
+            # Iterate through each page in the PDF and extract the text content.
+            for page in pdf_reader.pages:
+                pdf_text += page.extract_text()
 
-    with open(file_path, 'rb') as pdf_file:
-        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
-        text = ""
-        for page_num in range(pdf_reader.getNumPages()):
-            page = pdf_reader.getPage(page_num)
-            text += page.extract_text()
+        # Print a message to indicate the start of text chunk splitting.
+        print("Splitting the input text into smaller chunks...")
+        
+        # Set the chunk size to 512, which is assumed to be the maximum sequence length of a BERT model.
+        chunk_size = 512
+        
+        # Split the extracted PDF text into smaller chunks of the specified size.
+        text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
 
-        # Process the extracted text using spaCy to enhance extraction quality
-        doc = nlp(text)
+        # Print a message to indicate the start of chunk classification using the BERT model.
+        print("Classifying each chunk using the BERT model...")
 
-        # Define a mapping of section names to their corresponding regular expressions
-        section_patterns = {
-            "Introduction": r"Introduction[:\n\s]*(.+?)\n(.*?)(?=\b(?:Methods|Results|Discussion)\b|$)",
-            "Methods": r"Methods[:\n\s]*(.+?)\n(.*?)(?=\b(?:Results|Discussion)\b|$)",
-            "Results": r"Results[:\n\s]*(.+?)\n(.*?)(?=\b(?:Discussion)\b|$)",
-            "Discussion": r"Discussion[:\n\s]*(.+?)\n(.+)",
-        }
+        # Initialize an empty dictionary to store section texts, with section names as keys.
+        section_texts = {section: "" for section in section_names.values()}
 
-        # Read the PDF content
-        text_content = extract_text_from_pdf(file_path)
+        # Loop through each text chunk for classification.
+        for text_chunk in text_chunks:
 
-        # Extract sections using spaCy
-        sections = extract_sections_from_text(text_content)
+            # Tokenize the text_chunk using a tokenizer (assumed to be defined elsewhere).
+            # Return tensors in PyTorch format, pad sequences, and truncate if necessary.
+            inputs = tokenizer(text_chunk, return_tensors="pt", padding=True, truncation=True)
 
-        # Create a new PDF with the extracted content in IMRAD format
-        output_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
+            # Disable gradient computation for this part to speed up inference.
+            with torch.no_grad():
+                
+                # Pass the tokenized input to the BERT model for prediction.
+                outputs = bert_model(**inputs)
 
-        doc = SimpleDocTemplate(output_file_path, pagesize=letter)
-        styles = getSampleStyleSheet()
+                # Get the predicted sections by finding the index of the highest logit score.
+                predicted_sections = torch.argmax(outputs.logits, dim=1)
 
-        story = []
-        for section_name, section_content in sections.items():
-            # Create a Paragraph for the section name (in bold)
-            section_name_paragraph = Paragraph(f"<b>{section_name}</b>", styles['Heading1'])
-            story.append(section_name_paragraph)
+            # Initialize a variable to keep track of the current section being processed.
+            current_section = None
 
-            # Create a Paragraph for the section content
-            section_content_paragraph = Paragraph(section_content, styles['Normal'])
-            story.append(section_content_paragraph)
+            # Loop through each token in the input.
+            for token, section_id in zip(inputs["input_ids"][0], predicted_sections):
 
-            # Add a Spacer (optional) to separate sections
-            story.append(Spacer(1, 20))
+                # Decode the token to its text representation.
+                token_text = tokenizer.decode(token.item())
+                
+                
 
-        # Build the PDF
-        doc.build(story)
+                # Add spaces between tokens when reconstructing the text.
+                if current_section is not None:
+                    if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                        section_texts[current_section] += ' '
+                    section_texts[current_section] += token_text
 
-        return output_file_path
+                # Print the current section, text content, and token for each section.
+                print(f"Section: {current_section}")
+                print(f"Text: {section_texts[current_section]}")
+                print(f"Token: {token_text}")
+
+
+        # Print a message to indicate the start of generating a new PDF with IMRAD format.
+        print("Generating a new PDF with IMRAD format...")
+        
+        # Modify the file_path to include '_imrad.pdf' as the new file name.
+        converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
+        print(f"Saving converted file to: {converted_file_path}")
+        
+        # Create a PDF writer object to write the new PDF.
+        pdf_writer = PdfFileWriter()
+
+        # Iterate through section names and section texts to create new PDF content.
+        for section_name, section_text in section_texts.items():
+            # Create a new PDF using Reportlab.
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+
+            # Print section_name for debugging purposes
+            print(f"Section Name: {section_name}")
+
+            # Add section_name as text (make sure section_name contains the correct value)
+            can.drawString(10, 100, section_name)
+
+            # Add section_text as text
+            can.drawString(10, 80, section_text)
+            can.save()
+
+            # Move to the beginning of the StringIO buffer.
+            packet.seek(0)
+            new_pdf = PdfFileReader(packet)
+
+            # Add the "watermark" (which is the new pdf) on the existing page.
+            page = PageObject.createBlankPage(None, 612, 792)
+            page.mergePage(new_pdf.getPage(0))
+            pdf_writer.addPage(page)
+
+        # Write the generated PDF to the specified file path.
+        with open(converted_file_path, "wb") as f:
+            pdf_writer.write(f)
+
+        # Print a completion message.
+        print("Done!")
+
+        # Return the path to the converted PDF.
+        return converted_file_path
+    
+    except Exception as e:
+        # Handle any exceptions that may occur during the process and print an error message.
+        print(f"An error occurred while converting the PDF to IMRAD format: {e}")
 
 
 
+
+
+# Route to convert a publication to IMRAD format
 @app.route('/convert_to_imrad/<int:item_id>', methods=['GET'])
 def convert_to_imrad_route(item_id):
     """

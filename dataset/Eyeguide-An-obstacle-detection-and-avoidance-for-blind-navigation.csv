@@ -1,0 +1,128 @@
+Text,Label,,,,,,,,,
+"Technology is the collection of skills and techniques used to produce 
+goods or services as well as accomplishing particular objectives, either for a 
+scientific invention or a normal real-life application. This means that the use of 
+technology is beyond man’s predictions. Most often, technology can be 
+described as products, processes, and organizations. Computers and the
+Internet are two good examples of technology. It has advanced to its peak, 
+and it is progressing day by day. As the humanly available resources 
+increases, and new devices are invented, the technology is being re innovated each day. In other words, technology is being re-invented by 
+utilizing itself. The impact of technology in modern life is unmeasurable, 
+technology is used in different ways and sometimes the way people
+implement various technologies ends up harming our lives or the society we 
+leave in.
+Technology simplifies life in so many ways and everyone defines 
+technology in their own way. To some people, it means complicated electronic 
+devices. To others, it means the source of the radical changes that are 
+happening in all phases of life. Others define technology as science applied to 
+practical purposes. Some people fear to use technology while others see it as 
+the source of longer and more complete lives. According to Eddy (2011) mobile applications commonly known as 
+“apps”, are well chosen to be one of the fastest growing trends in Information 
+System Industry. Users enjoy the variety of features that mobile apps can 
+provide quickly and without introducing unnecessary complexity into their 
+design. 
+In addition to the above article, the usage of mobile phones has grown 
+so massively. It is not a luxurious item anymore, it is now part of people’s
+lifestyle. The types of the mobile phones are also various depending on the 
+technology that it possesses. Smart phones are one of the turning point in 
+history because it’s a huge addition of technology. Without smartphones, 
+there would be no such thing as using internet on the go. IPhone and Android 
+are two popular types of smartphones. A smartphone is a device that 
+combines cell phone with a hand-held computer, typically offering Internet 
+access, data storage, and email capability. This is useful for quick references 
+like looking something up on Google or using Google maps in the car to find 
+your destination. 
+“Visual Impairment” is the inability of a person to see normally or 
+properly. Others experience partial blindness and most of it leads to total 
+blindness. It cannot be fixed by eyeglasses. The fact remains that even 
+medicines are not enough to make a person recover from blindness and none 
+has been able to do so. The person with this kind of situation adapts with his 
+surroundings by means of touching and hearing, or else his movements will 
+be bounded by little capacities.
+Creating a device with the help of mobile phones for visually impaired 
+people is much needed in their daily lives because it help to navigate and 
+detect an object or obstacle. That is also because vision is one of very 
+important sense a human needs to survive. Vision is the experience of seeing 
+someone or something in a dream or trance or as a supernatural apparition, it
+is a God given ability that enables humans to interpret the environment in the 
+world they live in. Of all the senses, eyesight is the most active in terms of 
+manipulating movements in daily activities. It is the special sense by which the 
+qualities of an object such as color, luminosity, shape, and sizes constituting 
+its appearance are perceived through a process in which light rays entering 
+the eye are transformed by the retina into electrical signals that are 
+transmitted to the brain via the optic nerve.
+",Introduction,,,,,,,,,
+"The researchers conducted a survey to determine the level of 
+functionality and effectiveness of the obstruction detection device for the 
+visually impaired people. The study used purposive sampling technique. It is a 
+type of non-probability sampling technique that is most effective in getting 
+data from a cultural domain with knowledgeable expert. The expected number 
+of respondents is ten (10) visually impaired people. Six (6) of them are from 
+Vibes Massage Center and the other four (4) came from different locations. 
+The list of the visually impaired people in the massage center was taken from
+its manager/owner Mr. Renato A. Tiosan.
+",Method,,,,,,,,,
+"The researchers conducted a research and gathered information to be 
+able to identify the possible gap that brought the researchers to the developed 
+study. This would help for possible information needed that could be helpful in 
+making the application.
+In this study, the researchers discussed the way of gathering data with 
+primary and secondary data. For gathering primary data, the researchers 
+gathered information by using different application that is existing in the 
+market to be able to know what will be the possible problem that the 
+researcher will encounter on designing the mobile application, and stand as a 
+guide for the researchers’ study. For secondary data, the researchers gather 
+data on library which provide a previous study that will help for the researcher. 
+But library can’t give all the data that we need, so the researchers come up 
+with searching on the internet with a reliable website. 
+Library. This is one of the source which will help the study improve. It
+contains a lot of books, periodicals, and other material for reading, viewing, 
+listening, study, or reference. So, the researchers visited different libraries to 
+gather information needed in the development of the development application. 
+They browsed books and works for the better improvement of the study at 
+university library and College of Computer Studies Research Lab.
+Internet Research. It is the using of Internet information, especially 
+free information on the World Wide Web, in research. So the researchers 
+come up of browsing information on Google scholar, Philippine e-journal and 
+lastly watching on Youtube that is related and needed to their study through 
+the internet, and also for appropriate ideas needed for additional knowledge 
+and ideas. The researchers concluded that visually impaired people have 
+hard time navigating in an outdoor environment.
+Consultation. In this process there has a meeting with an expert or 
+professional, for more understanding. The researchers consulted with their 
+adviser and experts on the field for the improvement of the study. Also 
+researchers showed the update of their software and documents. 
+Interview. This is a formal consultation usually to evaluate a person or 
+gathered information to others to have an idea. So, the researchers 
+interviewed first, some professor in CCS department who teaching and 
+handling the subject related to their study, second is the owner of Vibes 
+Massage named Renato A. Tiosan, lastly are some worker of Vibes massage 
+named Janice Solano, Richard Salangga, May Ann Salangga and Daniel 
+Lobres which is visually impaired people.
+",Result,,,,,,,,,
+"This section gives an overview of the main features and capabilities of 
+the system. It provides enough information about the study.
+The developed system entitled “Eye Guide: An Obstacle detection and 
+Avoidance for blind Navigation” is a mobile-based application that maybe use 
+by android phone users, which can help those visually impaired people to 
+detect and navigate an obstacle in their front. It is very essential, to recognize 
+a product for their daily basis, the study focused on the development and 
+integration of the existing researches about object detections. The 
+researchers conceptualized design for better coverage of surroundings and 
+durable structure for the prototype.
+This study used Arduino Uno – CH340 and Gizduino ATmega644, 
+sensor in this study which is called the ultrasonic sensor. It is a sensor that 
+uses sonic waves to determine the distance of an object. Sound travels at 
+approximately 340 m/s. The specific brand of sensor that the researchers 
+used is the HC-SR04 ultrasonic sensor. The distance of an object, as 
+detected by the ultrasonic sensor, is half of the product of the sound velocity 
+and the time it takes for the sensor to transmit and receive signals. The 
+researchers have used the ultrasonic sensor because of its cheap price, large 
+distance coverage and its capability to detect objects without considering their 
+color unlike infrared sensors. To optimize the response of the sensor, the researchers have limited the distance that the sensor can detect into one 
+meter. The device’s construction look like a simple walking aid and it offers an
+audio output.
+It has one sensor which can rotate at 180 degree, the ultrasonic sensor 
+is placed at the top of servo motor which help the sensor to rotate. And it has 
+a Bluetooth module which can connect to mobile phone, and compatible to 
+arduino, it has simplified output directed to the mobile phone.",Discussion,,,,,,,,,

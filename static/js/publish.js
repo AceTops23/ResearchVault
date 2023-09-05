@@ -23,9 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Check if the selected file is a DOCX
+   
     if (file.type !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-      alert("Please select a DOCX file.");
-  return; // Stop form submission if the file is not a DOCX
+     alert("Please select a DOCX file.");
+    return; // Stop form submission if the file is not a DOCX
     }
 
     const formData = new FormData();

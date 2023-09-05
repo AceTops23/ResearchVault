@@ -1,0 +1,100 @@
+Text,Label,
+"As technology grows and develop, creative innovations also grow. 
+These changes make people’s lives easier and more convenient. As a result, 
+different emerging technology are being developed to ease the task and lessen 
+the time of how people and do their everyday lives. With this technological 
+advancement, a lot of industries are looking for ways to cope with this 
+advancement and improve business transactions and processes to its highest 
+level.
+Business people are usually fond of their works and usually spend their 
+time mostly in their office feels like it’s their second home. Office is the place 
+where business transaction happens and important files are kept, which are 
+really important to keep the business going on hence it really needs to be 
+managed and secured properly. With the security in the office, it ensures the 
+safety of employees, client files, assets and confidential documents. Security in 
+an office is really important because corporations, businesses and government 
+offices are often the target of sabotage, unlawful entry and theft. Thus, security 
+is highly need in this kind of environment to prevent this from happening.
+The Cashier' Office of Laguna State Polytechnic University (LSPU) Sta. 
+Cruz Main Campus processes the transaction of the university with regards to 
+money. They receive the payment for all the transactions in the university such 
+as payment fees for the enrollment, paycheck, etc. With regards to the security of the office, it uses the standard and most 
+common security system which requires a person to use a key to get into the 
+office. It is open early in the morning and is accessible to anyone. However, this
+existing security system has disadvantages where it can be easily forged and 
+stolen.
+Therefore, a more secured system for access control should be 
+modernized to enhance the security purposes of the office. A more reliable 
+security system should be provided by enhancing door access by having a 
+secured automation of door lock, identifying authorized persons who can enter 
+the office by using biometrics technology to provide a higher degree of security 
+compared to the conventional way and a security system that is also energy 
+efficient that will conserve unnecessary use of electricity by controlling the 
+power line of every electrical appliances through smart socket.",Introduction,
+"Efficiency and security is the ultimate concern in every transaction in 
+office. Security precautions is applied which is the standard security system that 
+requires a person to use a key to access the office. With the development of 
+technology and the continuous improvement of a person’s living standard, 
+besides in pursuing greater security, people are also in pursuit of automated, 
+intelligent and convenient systems for their office where electrical appliances 
+can be controlled by a person without going to the electrical appliances to turn 
+the power manually.
+In the development of the system, various elements are considered such 
+as materials to be used, its structure, the user interface design and the cost to be spent. Currently, the researchers have accomplished identifying these 
+elements. The first phase of the study aimed to design and develop a 
+systematized security system through the use of biometrics technology to
+enable security against intrusion and to provide controlling of appliances 
+remotely that will lead to improve usefulness of the office. Specifically, it aimed
+to (1) develop a system that could identify the authorized person who can enter 
+the administration office which will improve its security; (2) to develop and design 
+a door access security system based on fingerprint; and (3) to develop a 
+security system that is also an energy efficient entry system. 
+This study proceeded to its second phase in which the researchers 
+developed the system entitled “SMART OFFICE: Office Automation and 
+Security Monitoring System” - containing the objectives identified from the 
+previous phase of the study. At this point, the researchers acknowledged the 
+research general problem, how to validate the usefulness of the developed
+system, specifically sought to answer the following research questions: (1) how 
+to fulfill the functional requirements of the system? (2) how to test the developed 
+system on the LSPU Cashiers Office? (3) how to assess the acceptance of the 
+user in the developed system? (4) how to create an implementation plan to be 
+followed in the testing and implementation? (5) how to identify the cost that was 
+consumed on the development and implementation of the system?
+",Method,
+"Data Collection Methods
+The researchers obtained a deeper analysis on what are the problems 
+that they have encounter during the research, designing and data gathering 
+process. To be able to gather information needed in the study, the following 
+methods were applied:
+Library Research
+The researchers visited the library to have a detailed research and also 
+to read different books and materials that are relevant to the study being 
+conducted.
+Internet Research
+The researchers conducted research with the use of the internet to gain 
+some additional information and to boost the knowledge and ideas about the 
+developed system. The researchers browsed the internet thoroughly and found 
+some relevant sites which helped them for further understanding of the study. 
+Some relevant sites that researchers found are Google Scholar and 
+ejournal.ph. With this, they found ideas and designs that were implemented in 
+the system.
+Interview
+The researchers conducted an interview to the Administrative Officer I 
+of Cashier Office of the LSPU Sta. Cruz Campus, Mr. Efren Balandra, who 
+directs the cashier office. The researchers asked questions about the 
+procedures done, problems encountered and the requirements needed by the 
+cashier office with regards to their security. Mr. Balandra carefully explained the 
+processes that are done and the difficulties encountered by the staffs in terms of security. The information gathered were then analyzed and processed to 
+identify the cashier office’s problems and the requirements that are needed to 
+solve it. Due to this, the researchers were able to get a glimpse of what the 
+personnel needs in order to make their office up to date in terms of security.
+Questionnaire
+The questionnaire was prepared by the researchers to determine the 
+acceptance of the respondents. The respondents answered the questions 
+based on the following criteria: Quality Factors, Perceived of Ease of Use 
+(PEOU), Experience, Perceived in Usefulness, Attitude, Behavioral Intention, 
+Actual Use which follows the Technology Acceptance Model (TAM).",Result,
+"This chapter presents the analysis and interpretation of the test results 
+acquired from the surveys conducted by the researchers. It also discusses if 
+the study entitled, SMART OFFICE: Office Automation and Security Monitoring 
+System has satisfied and fulfilled the needs of its client.",Discussion,

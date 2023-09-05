@@ -1,0 +1,38 @@
+Text,Label
+"Computers make life easier for people every day. They help us to do tasks quicker and communicate with others just like one click. From the invention of the wheel to the Internet, technology has been a great factor on the way our civilization has grown. With more and more technological advances just around the corner, our civilization will continue to grow faster and faster than ever before.
+  Currently, people live in a time where searching for information only takes a few seconds. We live in a time where one can contact anyone virtually any minute anywhere in the world, as long the connection exists. We live in the time of the internet, where all transactions are made as quick as a blink of the eye and as easy as pie. One can find virtually anything that can think of online, and if necessary currencies are traded, receive the product or service.
+Existing mass Short Message Service (SMS) mailing systems are designed to work with a specific SMS gateway hence resulting in user lock-in to a SMS vendor. Also, some SMS gateways support scheduling of SMS message to be sent at a later time and date, others do not support it. Moreover, those gateways that support scheduling don't mostly allow users to cancel scheduled SMS message. This study has successfully designed and developed an enterprise class mass SMS mailing system that support multiple  users  as  well  as  multiple  SMS  gateways,  providing  a  unified  interface  and  common  set  of  features across  many  SMS  gateways  which  prevent 
+
+vendor  lock-in  as  users  can  choose  among  multiple  SMS  vendor gateways.  Another major feature provided by the new system is the introduction of SMS message scheduling. This  feature  makes  SMS  message  scheduling  possible across  all SMS  gateways  including  those  that  do  not internally support scheduling. Moreover, users can also cancel any scheduled message if the need be.
+Online scheduling systems are used to manage access thru online to service providers. Many  factors  affect  the performance  of  online systems  which  include  arrival  and  service  time  variability,  patient  and  provider preferences,  available  information  technology  and  the  experience  level  of  the  scheduling  staff.
+Thus  a    proper scheduling  system  has  to  developed  by  considering  all  these  factors  which  will  increase  patient  satisfaction,  which  in turn  increases  profit.  
+E-Sked: Online Scheduling Management System of Provincial Population Office with SMS Notification can deliver alerts and notifications to SMS devices. This is particularly useful when critical events require immediate attention and an email notification may be too slow. The developers aim is to propound solution to the problems regarding scheduling procedures and management, and to provide a user-friendly system for their
+
+
+ease and comfort. The system basically responds to the needs of the patients and the administrators
+",Introduction
+"The Provincial Population Office (PPO) is the one who gives service to the people to control our increasing population in our country. They encourage other people to have a family planning and to have a healthy family in their province.
+The PPO encountered different problem when it comes to manual scheduling and announcing of their projects like appointments and services of their patients. The researchers found out that they need to have more upgraded system like what the researchers will be provided to the employees of their office.
+The first phase of the study entitled “E-Sked: Online Scheduling Management System of Provincial Population Office with SMS Notification”, an automated system that improves scheduling of appointment by making it more accurate and efficient to everyone. It can generate reports such as bilateral tubal ligation, implant, and vasectomy. The project aims to answer the following questions: (1) What are the problems in the Provincial Population Office when they are using the manual assigning for clients schedule. The researchers found that the manual scheduling is very hassle for the employees of Provincial Population Office in data filing of the 
+
+scheduled patients, duplicate filing in their database, and too much paper works and it causes of loss documents. (2) How to developed a system that will easily know the patient when the exact day of their scheduled date. The researcher found that SMS notification would be a great solution to this problem since everyone using mobile phones. (3) What was the most appropriate system of manual scheduling of the patients in Provincial Population Office? The researchers develop an E-Sked: Online Scheduling Management System of Provincial Population Office with SMS Notification to improve and to automate the manual scheduling in their office. 
+The second phase of the study entitled E-Sked: Online Scheduling Management System of Provincial Population Office with SMS Notification aimed to answer the following research questions: (2) How to test the functionality of E-Sked: Online Scheduling Management System of Provincial Population Office with SMS Notification as perceived by the user? (3) How to evaluate the acceptability of the system using the Technology Acceptance Model questionnaire? (4) How to develop identify the cost that was consumed on the development of the system that was applied on the testing and implementation.
+",Method
+"The following instruments were used by the proponents in order to make the study feasible.
+ The researcher used materials such as books, manuscripts, thesis and previous related studies to help make the study feasible. The internet also 
+
+makes a big contribution in providing sufficient data needed by the proponents.
+The researcher used Fact finding technique to college data and information needed to develop the system like observation which gives researchers additional perspective and better understanding about the manual operations. It also allowed the researchers discover accurate information and data needed to be added on the system.
+ Internet Research 
+  The use of the computer and internet helps the proponents in discussing the different aspects of the proposed system. It enables the evaluation of the hardware and all the materials needed in the study. It provides additional ideas in the development of the proposed system. The internet also supplies information by providing other proposed study that in which it supports the system by means of function and principle. The World 
+
+
+Wide Web helps the proponents to accomplish the supporting documents for the creation of the study. 
+Library Research
+ The library is one of the main sources of information for the proponents in gathering information. The proponents read previous studies in the library to help in terms of related data which are essential in building theories in developing the proposed system. The information gathered from the related help in building the supporting documents for the proposed system. 
+
+Interview 
+ The researchers conducted an interview in Provincial Population Office where they gathered the data by asking questions and suggestions to get the needed information from the interviewee. 
+",Result
+This chapter presents the analysis and interpretation of the tests results acquired from the surveys conducted by the researchers. It also discusses if the study entitled E-Sked: Online Scheduling Management System of Provincial Population Office with SMS notification has satisfied and fulfilled the needs of its client.,Discussion
+,

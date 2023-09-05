@@ -1,0 +1,99 @@
+Text,Label
+"Occasionally a new technology appears which promises to change our daily 
+lives for the better. It improves the performance and gives faster services and creates
+possibilities and options that did not previously exist. Through this, information 
+system and new technologies has become a major or most important tool to improve 
+efficiency and will accelerate the movement toward this direction (Alami R. 2019). 
+In the Province of Laguna, flood management is a major problem especially in 
+the town of Santa Cruz by the lack of current flood level advisory so it affects the 
+community. According to Qomariyatus Sholihah (2020) floods are one of the most 
+disasters that is feared by the people due to its higher water discharge and other 
+impact such as carry waste materials and interfere to the community activities. 
+With the advancement of today’s technology, there are some existing devices 
+which helps the organization by providing information on the status of flood level 
+from a given rainfall measurement and rainfall duration. A study by Caraig, Dimaala 
+and Piamonte (2018) created a useful warning device that can give a warning signals 
+when the water level arises and can send Short SMS Advisory to the citizens that is 
+affected by flood.
+Furthermore, for the Disaster Risk Reduction and Management Office 
+(MDRRMO) the researchers proposed a project entitled Rainfall Advisory System
+with SMS Notification with a Rainfall device using Esp8266 and Tipping bucket that 
+focuses to design and develop a system that might help and provide an effective 
+solution in rainfall monitoring, giving or sending awareness to the citizens that is 
+prone by flooding.
+",Introduction
+"The Municipality of Santa Cruz is a 1st class Municipality in the Province of 
+Laguna and located at Calios Poblacion Tres in Santa Cruz. It was divided into 
+twenty-six (26) barangays with a total population of 116,605 people based on the 
+2015 census. As the focus of the study, the Municipal Disaster Risk Reduction Office
+(MDRRMO) was headed by Joshua Federick J. Vitaliz EnP. and administered by the 
+office of the Civil Defense (OCD) under the Department of National Defense (DND). 
+The department was divided into three (3) Divisions: (1) Research and Planning, (2) 
+Operation and Warning (3) Admin and Training.
+The Study focuses on the division of Operation and Warning of the 
+Department, under this division are the first responders in any accidents or disasters. 
+As their duties they needed to act to prevent further accidents due to the impacts of 
+disasters such as flooding. Flooding is the most common problem in Santa Cruz 
+especially to the areas which are near the riverside and bayside wherein the possibility 
+of much flooding. ",Method
+"Population of the Study
+The respondent of the study has a total of two-hundred and fifty one persons 
+that includes – one designated Office Administrator of MDRRMO, (25) Random 
+Citizens of each selected areas, and the front-liners of Barangay Local Government 
+Unit of the Low land areas which contain its – (1) Barangay Captain, (1) Secretary, 
+(1) Treasurer, (2) Councillors, (5) SK Councillors, (1) Barangay Driver, and (14) 
+Barangay Police Officers.Data Collection Method
+The study entitled “Rainfall Advisory System with SMS Notification” needed 
+accurate and mathematically significant data from Municipal Disaster Risk Reduction 
+and Management Office of Santa Cruz, Laguna. In the process of data gathering, the 
+researchers were gathered through collecting, and analyzing. The researchers used the 
+following methods of gathering the necessary information and requirement.
+Observation
+The researchers used this method to gather information that focuses on the 
+current state of technology and current process of the MDRRMO in terms of
+responding when an incident occurred and how they take actions to prevent further 
+accidents due to natural or man-made accidents. The researchers took down the 
+necessary information and analyzed the nature of work and processes that is involved 
+in the current state of technology and situation of the office.
+Interviews
+In this method, the researchers used semi-structured form and face-to-face 
+verbal interchange to generate insight concepts. The researcher started by 
+interviewing the Head Department and one of the Admin-staff of Research and 
+Planning. The client gave the information to the researchers including their majorproblem and challenges in terms of storing data, generating of reports, rainfall 
+monitoring and giving of awareness to the low land areas when a hazard occurred 
+especially flooding, which needs to perform force evacuation. The office was 
+experiencing hard times in terms of spreading awareness to the citizens of Santa Cruz, 
+and especially the most affected areas. According to the interview, the rescuers travel 
+every affected area using a siren while announcing that they needed to proceed at the 
+Evacuation Center. The researchers used this method to gain knowledge regarding the 
+experience, and situation of the client. The researchers formulate some ideas and 
+came up with this study.
+Library Research
+The researchers visited the library of LSPU, FEU, and de LaSalle and gathered all the 
+necessary data that are needed to develop the system. The researchers are able to find 
+related studies about rainfall advisory system.
+Internet Research
+The researchers also conducted internet research and visited different sites to 
+gather information regarding the computation of rainfall amount, information about 
+the Esp8266 and tipping bucket from different studies, other related studies and 
+literature to gain more knowledge in developing the proposed system. With the help 
+of internet, the researchers gathered a lot of ideas and information that would help 
+them for the development of the study.
+Surveys and Questionnaire
+Surveys were given to the I.T experts and respondents of the study in order to 
+satisfy the researcher’s goal, in this method; the researchers used an Online Survey 
+due to the pandemic. The instrument was used to gather opinions, feedback towards 
+the developed system. In the preliminary survey the researchers identify the majorproblems of the office in terms of measuring, monitoring and giving awareness to the 
+flood prone low land areas that can possibly use the rainfall advisory system and 
+rainfall device. With this research instrument, the researchers also determined the 
+platform’s usefulness, significance and acceptance, solidifying the viability of the 
+developed system and rainfall device.",Result
+"This chapter presents the result and the main findings of the study. It shows 
+how the researchers answer the research problems and how it was achieved. The 
+methods used in the development of the study was also discussed in this chapter. 
+Research Objectives
+The aims of the study is to design, develop, test and evaluate the user 
+acceptability of the Rainfall Advisory System with SMS Notification that will provide 
+accurate data from the Rainfall device, to handle, store, exporting of current and 
+previous data of rainfall intensities, forecasting, monitoring, and generate SMS 
+notification",Discussion
