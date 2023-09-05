@@ -5,7 +5,7 @@
     padding: 0;
     font-family: 'Poppins', sans-serif;
     font-size: clamp(0.9375rem, 0.5469rem + 1.25vw, 1.25rem);
-    color: white !important;
+    color: rgb(61, 61, 61)!important;
 }
 
 body{
@@ -13,7 +13,7 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: #8eb2c5 !important;
+    background: white !important;
 }
 
 .container{
@@ -21,7 +21,7 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(35, 50, 59, 0.7) !important;
+    background: rgba(167, 193, 209, 0.7) !important;
     width: 90%;
     height: 90%;
     border-radius: 8px;
@@ -42,12 +42,15 @@ a{
 .right button,
 .right-dropdown button{
     width: 200px;
-    background: #1AB187 !important;
+    background: blue !important;
+    color: white !important;
     border: none;
+    border-radius: 20px;
     padding: 2px 0;
     letter-spacing: 3px;
     color: black;
     cursor: pointer;
+    transition: all 0.3s linear;
 }
 
 .right,
@@ -55,6 +58,7 @@ a{
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: 20px;
     letter-spacing: 3px;
     gap: 50px;
 }
@@ -62,8 +66,9 @@ a{
 .right button:hover,
 .right-dropdown button:hover{
     transition: all 0.3s linear;
-    background: #C6F8E5 !important;
-    color: black !important;
+    color: white !important;
+    background: rgb(0, 0, 66) !important;
+
     border: none;
     
 }
@@ -73,7 +78,7 @@ a{
     position: absolute;
     right: 90px;
     top: 110px;
-    background: rgba(35, 50, 59, 0.7) !important;
+    background: rgba(167, 193, 209, 0.7) !important;
     padding: 50px;
     border-radius: 8px;
     backdrop-filter: blur(10px);
@@ -160,29 +165,29 @@ a{
 }
 #about{
     background: none !important;
-    border: 1px solid #C1BDBA;
+    border: 1px solid #000000;
     transition: all 0.3s linear;
     box-sizing: border-box;
 }
 
 #about:hover{
     transition: all 0.3s linear;
-    background: #C6F8E5 !important;
-    color: black !important;
+    color: white !important;
+    background: rgb(0, 0, 66) !important;
     border: none;
 }
 
 #start{
     background: none !important;
-    border: 1px solid #C1BDBA;
+    border: 1px solid #000000;
     transition: all 0.3s linear;
     box-sizing: border-box;
 }
 
 #start:hover{
     transition: all 0.3s linear;
-    background: #C6F8E5 !important;
-    color: black !important;
+    color: white !important;
+    background: rgb(0, 0, 66) !important;
     border: none;
 }
 
@@ -201,7 +206,7 @@ a{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(35, 50, 59, 0.7) !important;
+    background: rgba(167, 193, 209, 0.7) !important;
     height: 250px;
     width: 350px;
     color: white !important;
@@ -231,15 +236,18 @@ a{
     padding: 10px;
     width: 300px;
     border:1px solid #627179;
+    color: white !important;
     font-size: clamp(0.625rem, 0.3125rem + 1vw, 0.875rem);
-    background: #23323b !important;
+    background: #2a3136 !important;
 }
+
 
 .login-container button{
     padding: 2px 0;
     width: 320px;
     border: none;
-    background: #1AB187 !important;
+    color: white !important;
+    background: Blue !important;
     cursor: pointer;
     letter-spacing: 5px;
     transition: all 0.3s linear;
@@ -256,7 +264,7 @@ a{
 
 /* Signup */ 
 .signup-container{
-    background: rgba(35, 50, 59, 0.7) !important;
+    background: rgba(167, 193, 209, 0.7) !important;
     color: white !important;
     height: 300px;
     width: 400px;
@@ -326,7 +334,8 @@ a{
     padding: 10px;
     width: 460px;
     border: none;
-    background: #1AB187 !important;
+    color: white !important;
+    background: blue !important;
     cursor: pointer;
     font-size: clamp(0.625rem, -0.1563rem + 2.5vw, 1.25rem);
 }

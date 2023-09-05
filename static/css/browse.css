@@ -8,14 +8,14 @@ body{
     display: flex;
     padding: 10px;
     height: 100vh;
-    background: #8EB2C5 !important;
+    color: rgb(61, 61, 61)!important;
 }
 
 .container{
     height: 99%;
     border-radius: 5px;
-    background-color: rgba(35, 50, 59, 0.7) !important;
-    color: white !important;
+    background: rgba(167, 193, 209, 0.7) !important;
+    color: rgb(61, 61, 61)!important;
 }
 
 img{
@@ -26,7 +26,7 @@ img{
 
 a{
     text-decoration: none !important;
-    color: white !important;
+    color: rgb(61, 61, 61)!important;
     font-size: clamp(0.75rem, 0.2813rem + 1.5vw, 1.125rem);
 }
 
@@ -39,7 +39,7 @@ a{
 
 .browse-result{
     display: flex;
-    height: 70vh;
+    height: 80vh;
 }
 
 input, select{
@@ -64,8 +64,9 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 #search-button{
-    background-color: #1AB187 !important;
+    background-color: blue !important;
     border: none !important;
+    color: white !important;
     outline: none !important;
     letter-spacing: 3px;
     transition: all 0.3s linear;
@@ -74,7 +75,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 #search-button:hover{
     transition: all 0.3s linear;
-    background: #C6F8E5 !important;
+    background: rgb(0, 0, 66) !important;
 }
 
 h3{

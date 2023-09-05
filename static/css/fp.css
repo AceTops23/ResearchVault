@@ -5,12 +5,13 @@
 }
 
 body{
-    background: #8EB2C5 !important;
+    background: white !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
+    color: rgb(61, 61, 61)!important
 }
 
 img{
@@ -24,16 +25,16 @@ img{
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    color: rgb(61, 61, 61)!important
 }
 
 .fp-container {
     padding: 20px;
-    background: rgba(35, 50, 59, 0.7) !important;
-    color: white !important;
+    background: rgba(167, 193, 209, 0.7) !important;
+    color: rgb(61, 61, 61)!important;
     border: none;
     border-radius: 8px;
     width: 500px;
-    border: 1px solid #000000;
 }
 
 input{
@@ -55,9 +56,16 @@ button{
 
 #fp-search,
 #fp-login{
-    background: #1AB187 ;
+    background: blue ;
+    transition: all 0.3s linear;
 }
 
+#fp-search:hover,
+#fp-login:hover{
+    transition: all 0.3s linear;
+    background: rgb(0, 0, 66) !important;
+    color: white !important;
+}
 .btn:focus,
 .btn:active,
 .btn:hover,

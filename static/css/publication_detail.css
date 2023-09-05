@@ -5,7 +5,7 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #8EB2C5 ;
+    background: white !important;
     font-family: 'Poppins', sans-serif;
 }
 
@@ -25,11 +25,11 @@ i{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    color: white ;
+    color: rgb(61, 61, 61)!important;
     align-items: center;
     width: 1300px;
     height: 100%;
-    background: #435864 ;
+    background: rgba(167, 193, 209, 0.7);
     border-radius: 8px;
     padding: 20px;
 }
@@ -43,7 +43,8 @@ i{
 button{
     font-family: 'Poppins', sans-serif;
     letter-spacing: 3px;
-    background-color: #1AB187 !important;
+    color: white !important;
+    background-color: blue !important;
     padding: 5px;
     border: none !important;
     transition: all 0.3s linear;
@@ -52,7 +53,7 @@ button{
 
 button:hover{
     transition: all 0.3s linear;
-    background: #C6F8E5 !important;
+    background: rgb(0, 0, 66) !important;
 }
 
 .apa-citation-container{
@@ -66,10 +67,10 @@ button:hover{
     border: none;
     padding: 10px;
     text-align: justify;
-    background: rgba(67, 88, 100, 0.7);
+    background: rgba(167, 193, 209, 0.7) !important;
     width: 500px;
     height: 200px;
-    color: white;
+    color: black;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
     box-shadow: 0 1px 25px rgba(0,0,0,0.2);

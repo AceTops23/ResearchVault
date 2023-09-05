@@ -8,7 +8,7 @@ body{
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    background: #8EB2C5 !important;
+    color: white !important
 }
 
 header{
@@ -33,19 +33,19 @@ header{
 
 a{
     text-decoration: none !important;
-    color: black !important;
+    color: rgb(61, 61, 61)!important;
   }
  
 
 .container{
-    background: #435864 !important;
+    background: rgba(167, 193, 209, 0.7) !important;
     width: 1500px;
     height: 850px;
     border-radius: 8px;
 }
 
 button {
-    background-color: #1AB187 !important;
+    background-color: blue !important;
     border: none;
     padding: 5px;
     transition: all 0.3s linear;
@@ -61,8 +61,8 @@ button {
  
  button:hover {
      transition: all 0.3s linear;
-     color: black !important;
-     background-color: #c6f8e5 !important;
+     color: white !important;
+     background: rgb(0, 0, 66) !important;
      width: 200px;
      outline: none !important;
      border: none !important;
