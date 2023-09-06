@@ -153,6 +153,11 @@ def edit():
     """Route for rendering the unapprove docx"""
     return render_template("edit.html")
 
+@app.route("/wp")
+def edit():
+    """Route for rendering the unapprove docx details"""
+    return render_template("wp.html")
+
 
 @app.route("/api", methods=["POST"])
 def api():
