@@ -1,2 +1,10 @@
 
 *.csv
+Models/BERT Model/checkpoint.pth
+Models/BERT Model/config.json
+Models/BERT Model/loss_fn.pt
+Models/BERT Model/optimizer.pt
+Models/BERT Model/pytorch_model.bin
+Models/BERT Model/special_tokens_map.json
+Models/BERT Model/tokenizer_config.json
+Models/BERT Model/vocab.txt

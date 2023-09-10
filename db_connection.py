@@ -103,7 +103,7 @@ class DBConnection:
 
         return True, 'Account created successfully.'
     
-    def insert_upload(self, title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path):
+    def insert_upload(self, title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path, status):
         """
         Insert a new record into the 'uploads' table.
 
@@ -117,6 +117,7 @@ class DBConnection:
         - subjectArea (str): The subject area of the research.
         - abstract (str): The abstract of the research.
         - file_path (str): The path of the uploaded file in the server.
+        - status (str): The status of the upload.
 
         Returns:
         - bool: True if the insertion is successful, False otherwise.
@@ -125,36 +126,37 @@ class DBConnection:
             conn = self.get_db()
             cursor = conn.cursor()
             
-            cursor.execute("INSERT INTO uploads (title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path))
+            cursor.execute("INSERT INTO uploads (title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, file_path, status))
             conn.commit()
             return True
         except Exception as e:
             print("Error inserting record:", e)
             conn.rollback()
             return False
+
         
     def fetch_publications(self, selected_sort, selected_field, selected_year, search_query):
         try:
             conn = self.get_db()
             cursor = conn.cursor()
 
-            query = "SELECT id, title, authors, publicationDate, subjectArea FROM uploads"
+            query = "SELECT id, title, authors, publicationDate, subjectArea FROM uploads WHERE status = 'Published'"
 
             # Filter based on the selected field option
             params = ()
             if selected_field:
-                query += " WHERE subjectArea = ?"
+                query += " AND subjectArea = ?"
                 params += (selected_field,)
 
             cursor.execute(query, params)
             items = [{'id': row[0], 'title': row[1], 'authors': row[2], 'year': row[3], 'subjectArea': row[4]} for row in cursor.fetchall()]
 
             # Fetch unique subject areas from the database
-            cursor.execute("SELECT DISTINCT subjectArea FROM uploads")
+            cursor.execute("SELECT DISTINCT subjectArea FROM uploads WHERE status = 'Published'")
             unique_subject_areas = [row[0] for row in cursor.fetchall()]
 
             # Fetch unique years from the database
-            cursor.execute("SELECT DISTINCT substr(publicationDate, 1, 4) FROM uploads")
+            cursor.execute("SELECT DISTINCT substr(publicationDate, 1, 4) FROM uploads WHERE status = 'Published'")
             unique_years = [row[0] for row in cursor.fetchall()]
 
             # Filter items by year if selected_year is provided
@@ -178,6 +180,53 @@ class DBConnection:
         except Exception as e:
             print("Error fetching publications:", e)
             return [], [], []
+
+    def fetch_research_publications(self, selected_sort, selected_field, selected_year, search_query):
+        try:
+            conn = self.get_db()
+            cursor = conn.cursor()
+
+            query = "SELECT id, title, authors, publicationDate, subjectArea FROM uploads WHERE status = 'Working'"
+
+            # Filter based on the selected field option
+            params = ()
+            if selected_field:
+                query += " AND subjectArea = ?"
+                params += (selected_field,)
+
+            cursor.execute(query, params)
+            items = [{'id': row[0], 'title': row[1], 'authors': row[2], 'year': row[3], 'subjectArea': row[4]} for row in cursor.fetchall()]
+
+            # Fetch unique subject areas from the database
+            cursor.execute("SELECT DISTINCT subjectArea FROM uploads WHERE status = 'Working'")
+            unique_subject_areas = [row[0] for row in cursor.fetchall()]
+
+            # Fetch unique years from the database
+            cursor.execute("SELECT DISTINCT substr(publicationDate, 1, 4) FROM uploads WHERE status = 'Working'")
+            unique_years = [row[0] for row in cursor.fetchall()]
+
+            # Filter items by year if selected_year is provided
+            if selected_year:
+                items = [item for item in items if item['year'] == selected_year]
+
+            # Sort the items based on the selected_sort option
+            if selected_sort == 'latest':
+                items.sort(key=lambda x: x['year'], reverse=True)
+            elif selected_sort == 'oldest':
+                items.sort(key=lambda x: x['year'])
+            else:  # Sort alphabetically by title (default)
+                items.sort(key=lambda x: x['title'])
+
+            # Filter items by search query
+            if search_query:
+                search_query = search_query.lower()
+                items = [item for item in items if search_query in item['title'].lower() or search_query in item['authors'].lower()]
+
+            return items, unique_subject_areas, unique_years
+        except Exception as e:
+            print("Error fetching publications:", e)
+            return [], [], []
+
 
         
     def get_publication_by_id(self, item_id):

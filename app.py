@@ -21,6 +21,10 @@ import PyPDF2
 from flask import Flask, render_template, request, jsonify, session, send_file
 from db_connection import DBConnection
 
+# Load the BERT model and tokenizer
+model_path = "Models\BERT Model" 
+tokenizer = BertTokenizer.from_pretrained(model_path)
+bert_model = BertForSequenceClassification.from_pretrained(model_path)
 
 # Mapping of section indices to section names
 section_names = {0: "Introduction", 1: "Method", 2: "Result", 3: "Discussion"}
@@ -34,7 +38,7 @@ nlp = spacy.load("en_core_web_sm")
 DB = 'database.db'
 
 # Set up OpenAI API credentials
-openai.api_key = "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"
+openai.api_key = "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"
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
@@ -150,8 +154,29 @@ def doc():
 
 @app.route("/edit")
 def edit():
-    """Route for rendering the unapprove docx"""
-    return render_template("edit.html")
+    """Route for rendering the unapprove docx
+    This route handles the browsing of publications based on selected sorting, field, year, and search query.
+    """
+    try:
+        db_conn = DBConnection('database.db')
+
+        selected_sort = request.args.get('sort', 'latest')
+        selected_field = request.args.get('field', '')
+        selected_year = request.args.get('year', '')
+        search_query = request.args.get('search', '')  # Get the search query from the query parameters
+
+        items, unique_subject_areas, unique_years = db_conn.fetch_research_publications(
+            selected_sort, selected_field, selected_year, search_query)
+
+        db_conn.close_connection()
+
+        return render_template('edit.html', items=items, subject_areas=unique_subject_areas,
+                               unique_years=unique_years, selected_sort=selected_sort,
+                               selected_field=selected_field, selected_year=selected_year,
+                               search_query=search_query)
+    except Exception as e:
+        print("Error browsing publications:", e)
+        return render_template('404.html')
 
 
 @app.route("/api", methods=["POST"])
@@ -200,11 +225,12 @@ def submit_data():
     degree = request.form['degree']
     subjectArea = request.form['subjectArea']
     abstract = request.form['abstract']
+    status = request.form['status']  # Extract status from form data
     uploaded_file = request.files['file']
     filename = save_file(uploaded_file)
 
     if filename:
-        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename):
+        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename, status):  # Pass status to insert_upload function
             # Insertion successful
             print("Upload record inserted successfully!")
             return "Upload successful!"
@@ -213,6 +239,7 @@ def submit_data():
             print("Failed to insert upload record.")
 
     return "Data submitted successfully!"
+
 
 
 @app.route('/publication_detail/<int:item_id>')
@@ -265,7 +292,101 @@ def serve_pdf(filename):
     pdf_path = os.path.join('uploads', filename)
     return send_file(pdf_path, mimetype='application/pdf')
 
+def convert_to_imrad(file_path):
+    try:
+        with open(file_path, "rb") as f:
+            pdf_reader = PdfFileReader(f)
+            pdf_text = ""
+            
+            for page in pdf_reader.pages:
+                pdf_text += page.extract_text()
 
+        chunk_size = 512
+        text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
+        section_texts = {section: "" for section in section_names.values()}
+
+        for text_chunk in text_chunks:
+            inputs = tokenizer(text_chunk, return_tensors="pt", padding=True, truncation=True)
+            
+            with torch.no_grad():
+                outputs = bert_model(**inputs)
+                predicted_sections = torch.argmax(outputs.logits, dim=1)
+                
+            current_section = section_names[predicted_sections[0].item()]
+            for token in inputs["input_ids"][0]:
+                token_text = tokenizer.decode(token.item(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                
+                if current_section is not None:
+                    if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                        section_texts[current_section] += ' '
+                    
+                    section_texts[current_section] += token_text
+  
+                print(f"Section: {current_section}")
+                print(f"Text: {section_texts[current_section]}")
+                print(f"Token: {token_text}")
+
+        converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
+        pdf_writer = PdfFileWriter()
+
+        for section_name, section_text in section_texts.items():
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=letter)
+            can.drawString(10, 100, section_name)
+            x = 10
+            y = 80
+            
+            for line in section_text.split('\n'):
+                can.drawString(x, y, line)
+                y -= 15
+                
+            can.save()
+            packet.seek(0)
+            new_pdf = PdfFileReader(packet)
+            page = PageObject.createBlankPage(None, 612, 792)
+            page.mergePage(new_pdf.getPage(0))
+            pdf_writer.addPage(page)
+
+
+        with open(converted_file_path, "wb") as f:
+            pdf_writer.write(f)
+
+        return converted_file_path
+    
+    except Exception as e:
+        print(f"An error occurred while converting the PDF to IMRAD format: {e}")
+
+
+
+
+
+
+
+# Route to convert a publication to IMRAD format
+@app.route('/convert_to_imrad/<int:item_id>', methods=['GET'])
+def convert_to_imrad_route(item_id):
+    """
+    Route to convert a publication to IMRAD format.
+
+    This route takes the item_id of a publication, converts it to IMRAD format, and returns the converted PDF.
+    """
+    publication = db_connection.get_publication_by_id(item_id)
+    if publication is None:
+        return jsonify({"message": "Publication not found."}), 404
+
+    file_name = os.path.basename(publication['file_path'])
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+    try:
+        # Perform the conversion and get the converted file path
+        converted_file_path = convert_to_imrad(file_path)
+
+        # Update the database with the converted file path
+        db_connection.update_converted_file_path(item_id, converted_file_path)
+
+        # Return the converted PDF for preview in the page
+        return send_file(converted_file_path, as_attachment=False)
+    except Exception as e:
+        return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
 
 def generate_apa_citation_from_data(publication):
     """
