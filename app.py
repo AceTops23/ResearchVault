@@ -153,6 +153,11 @@ def research():
     """Route for rendering the unapprove docx"""
     return render_template("research.html")
 
+@app.route("/abstract")
+def abstract():
+    """Route for rendering the 5 abstract"""
+    return render_template("abstract.html")
+
 @app.route("/api", methods=["POST"])
 def api():
     """Route to handle POST requests for the chatbot API"""

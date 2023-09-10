@@ -59,15 +59,15 @@ document.addEventListener("DOMContentLoaded", function () {
   approveForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-  const title = document.querySelector("#title").value;
-  const authors = document.querySelector("#authors").value;
-  const publicationDate = document.querySelector("#yearInput").value;
-  const thesisAdvisor = document.querySelector("#thesisAdvisor").value;
-  const department = document.querySelector("#department").value;
-  const degree = document.querySelector("#degree").value;
-  const subjectArea = document.querySelector("#subjectArea").value;
-  const abstract = document.querySelector("#abstract").value;
-  const file = fileInput.files[0];
+    const title = document.querySelector("#title").value;
+    const authors = document.querySelector("#authors").value;
+    const publicationDate = document.querySelector("#yearInput").value;
+    const thesisAdvisor = document.querySelector("#thesisAdvisor").value;
+    const department = document.querySelector("#department").value;
+    const degree = document.querySelector("#degree").value;
+    const subjectArea = document.querySelector("#subjectArea").value;
+    const abstract = document.querySelector("#abstract").value;
+    const file = fileInput.files[0];
 
     // Check if any required field is empty
     if (!title || !authors || !publicationDate || !thesisAdvisor || !department || !degree || !subjectArea || !abstract || !file) {
@@ -100,14 +100,17 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         // Handle any response data if needed
         alert("Upload successful!");
-          window.location.href = "/"; // Redirect to index.html
+        window.location.href = "/abstract"; // Redirect to index.html\
       })
+
       .catch((error) => {
         // Handle any errors that occurred during the request
         console.error("Error:", error);
       });
   });
 });
+
+
 
 $(document).ready(function() {
   // Check session state on page load
