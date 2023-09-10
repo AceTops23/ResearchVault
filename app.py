@@ -148,16 +148,10 @@ def doc():
     """Route for the documentation page"""
     return render_template('doc.html')
 
-@app.route("/edit")
-def edit():
+@app.route("/research")
+def research():
     """Route for rendering the unapprove docx"""
-    return render_template("edit.html")
-
-@app.route("/wp")
-def edit():
-    """Route for rendering the unapprove docx details"""
-    return render_template("wp.html")
-
+    return render_template("research.html")
 
 @app.route("/api", methods=["POST"])
 def api():
