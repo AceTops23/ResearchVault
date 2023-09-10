@@ -152,11 +152,9 @@ def doc():
     """Route for the documentation page"""
     return render_template('doc.html')
 
-@app.route("/edit")
-def edit():
-    """Route for rendering the unapprove docx
-    This route handles the browsing of publications based on selected sorting, field, year, and search query.
-    """
+@app.route("/research")
+def research():
+    """Route for rendering the unapprove docx"""
     try:
         db_conn = DBConnection('database.db')
 
@@ -170,14 +168,13 @@ def edit():
 
         db_conn.close_connection()
 
-        return render_template('edit.html', items=items, subject_areas=unique_subject_areas,
+        return render_template('research.html', items=items, subject_areas=unique_subject_areas,
                                unique_years=unique_years, selected_sort=selected_sort,
                                selected_field=selected_field, selected_year=selected_year,
                                search_query=search_query)
     except Exception as e:
         print("Error browsing publications:", e)
         return render_template('404.html')
-
 
 @app.route("/api", methods=["POST"])
 def api():
@@ -355,10 +352,6 @@ def convert_to_imrad(file_path):
     
     except Exception as e:
         print(f"An error occurred while converting the PDF to IMRAD format: {e}")
-
-
-
-
 
 
 
