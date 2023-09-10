@@ -19,7 +19,7 @@ function handleSearchAndFilter() {
   const selectedSort = document.getElementById('sort').value;
   const selectedYear = document.getElementById('year-input').value;
 
-  let url = '/research?';
+  let url = '/browse?';
   if (searchQuery) {
       url += `search=${encodeURIComponent(searchQuery)}&`;
   }
