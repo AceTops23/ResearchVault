@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         // Handle any response data if needed
         alert("Upload successful!");
-        window.location.href = "/"; // Redirect to index.html
+        window.location.href = "/abstract"; // Redirect to index.html
       })
       .catch((error) => {
         // Handle any errors that occurred during the request

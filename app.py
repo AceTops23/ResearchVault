@@ -21,11 +21,6 @@ import PyPDF2
 from flask import Flask, render_template, request, jsonify, session, send_file
 from db_connection import DBConnection
 
-# Load the BERT model and tokenizer
-model_path = "Models\BERT Model" 
-tokenizer = BertTokenizer.from_pretrained(model_path)
-bert_model = BertForSequenceClassification.from_pretrained(model_path)
-
 # Mapping of section indices to section names
 section_names = {0: "Introduction", 1: "Method", 2: "Result", 3: "Discussion"}
 
@@ -294,97 +289,6 @@ def serve_pdf(filename):
     pdf_path = os.path.join('uploads', filename)
     return send_file(pdf_path, mimetype='application/pdf')
 
-def convert_to_imrad(file_path):
-    try:
-        with open(file_path, "rb") as f:
-            pdf_reader = PdfFileReader(f)
-            pdf_text = ""
-            
-            for page in pdf_reader.pages:
-                pdf_text += page.extract_text()
-
-        chunk_size = 512
-        text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
-        section_texts = {section: "" for section in section_names.values()}
-
-        for text_chunk in text_chunks:
-            inputs = tokenizer(text_chunk, return_tensors="pt", padding=True, truncation=True)
-            
-            with torch.no_grad():
-                outputs = bert_model(**inputs)
-                predicted_sections = torch.argmax(outputs.logits, dim=1)
-                
-            current_section = section_names[predicted_sections[0].item()]
-            for token in inputs["input_ids"][0]:
-                token_text = tokenizer.decode(token.item(), skip_special_tokens=True, clean_up_tokenization_spaces=True)
-                
-                if current_section is not None:
-                    if section_texts[current_section] and not section_texts[current_section].endswith(' '):
-                        section_texts[current_section] += ' '
-                    
-                    section_texts[current_section] += token_text
-  
-                print(f"Section: {current_section}")
-                print(f"Text: {section_texts[current_section]}")
-                print(f"Token: {token_text}")
-
-        converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
-        pdf_writer = PdfFileWriter()
-
-        for section_name, section_text in section_texts.items():
-            packet = io.BytesIO()
-            can = canvas.Canvas(packet, pagesize=letter)
-            can.drawString(10, 100, section_name)
-            x = 10
-            y = 80
-            
-            for line in section_text.split('\n'):
-                can.drawString(x, y, line)
-                y -= 15
-                
-            can.save()
-            packet.seek(0)
-            new_pdf = PdfFileReader(packet)
-            page = PageObject.createBlankPage(None, 612, 792)
-            page.mergePage(new_pdf.getPage(0))
-            pdf_writer.addPage(page)
-
-
-        with open(converted_file_path, "wb") as f:
-            pdf_writer.write(f)
-
-        return converted_file_path
-    
-    except Exception as e:
-        print(f"An error occurred while converting the PDF to IMRAD format: {e}")
-
-
-
-# Route to convert a publication to IMRAD format
-@app.route('/convert_to_imrad/<int:item_id>', methods=['GET'])
-def convert_to_imrad_route(item_id):
-    """
-    Route to convert a publication to IMRAD format.
-
-    This route takes the item_id of a publication, converts it to IMRAD format, and returns the converted PDF.
-    """
-    publication = db_connection.get_publication_by_id(item_id)
-    if publication is None:
-        return jsonify({"message": "Publication not found."}), 404
-
-    file_name = os.path.basename(publication['file_path'])
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
-    try:
-        # Perform the conversion and get the converted file path
-        converted_file_path = convert_to_imrad(file_path)
-
-        # Update the database with the converted file path
-        db_connection.update_converted_file_path(item_id, converted_file_path)
-
-        # Return the converted PDF for preview in the page
-        return send_file(converted_file_path, as_attachment=False)
-    except Exception as e:
-        return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
 
 def generate_apa_citation_from_data(publication):
     """

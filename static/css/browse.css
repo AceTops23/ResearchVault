@@ -35,7 +35,7 @@ a{
     font-size: clamp(0.9375rem, 0.5469rem + 1.25vw, 1.25rem);
     gap: 50px;
     letter-spacing: 3px;
-}
+} 
 
 .browse-result {
     display: flex;
