@@ -28,9 +28,7 @@ def preprocess_text(text):
     if isinstance(text, str):
         stop_words = set(stopwords.words('english'))
         stemmer = PorterStemmer()
-        
         words = nltk.word_tokenize(text)
-        
         processed_words = []
         for word in words:
             if word.isnumeric():
@@ -40,7 +38,6 @@ def preprocess_text(text):
                 pos_tag = nltk.pos_tag([stemmed_word])[0][1]
                 if pos_tag.startswith('NN'):
                     processed_words.append(stemmed_word)
-        
         filtered_words = [word for word in processed_words if word.lower() not in stop_words]
 
         # Named Entity Recognition
@@ -89,17 +86,17 @@ if __name__ == "__main__":
     df.dropna(subset=["preprocessed_text", "Label"], inplace=True)
 
     # Step 5: Topic Modeling
+    
     texts = df["preprocessed_text"].tolist()
-    tokenized_texts = [text.split() for text in texts]  # Tokenize the preprocessed text
+    tokenized_texts = [text.split() for text in texts] 
     dictionary = corpora.Dictionary(tokenized_texts)
     corpus = [dictionary.doc2bow(tokens) for tokens in tokenized_texts]
-
     lda_model = models.LdaModel(corpus, id2word=dictionary, num_topics=5, passes=15)
 
-    # Step 6: Feature Extraction using TF-IDF
+    
     vectorizer = TfidfVectorizer()
-    preprocessed_texts = df["preprocessed_text"].tolist()  # List of preprocessed text strings
-    X = vectorizer.fit_transform(preprocessed_texts)  # Apply TfidfVectorizer to the list of strings
+    preprocessed_texts = df["preprocessed_text"].tolist()  
+    X = vectorizer.fit_transform(preprocessed_texts) 
     y = df["Label"]
 
     # Step 7: Model Training

@@ -118,6 +118,7 @@ report = classification_report(true_labels_list, predicted_labels_list, target_n
 print("Classification Report:\n", report)
 
 # Generate confusion matrix
+
 conf_matrix = confusion_matrix(true_labels_list, predicted_labels_list)
 print("Confusion Matrix:\n", conf_matrix)
 
