@@ -12,12 +12,19 @@
 
     <a href="/publish"><i class='bx bx-chevron-left'></i></a>
     <div class="container">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+        <div class="span-container">
+            <span class="hidden"></span>
+            <span class="hidden"></span>
+            <span class="hidden"></span>
+            <span class="hidden"></span>
+            <span class="hidden"></span>
+        </div>
+
+        <div class="buttons">
+            <button id="generate">Generate Abstract</button>
+            <button id="submit">Submit</button>
+        </div>
+    </div>
       
       <script src="{{ url_for('static', filename='js/abstract.js') }}"></script>
 </body>
