@@ -23,7 +23,7 @@ body{
     padding: 20px;
     gap: 20px; /* Adjust the gap between items as needed */
     overflow-y: auto; /* Add scroll when needed */
-    max-height: 300px; /* Adjust the max height for scroll as needed */
+    max-height: 1000px; /* Adjust the max height for scroll as needed */
   }
 
   .span-container{
@@ -32,7 +32,26 @@ body{
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    padding: 10px;
     gap: 20px;
+    flex-wrap: wrap; /* Allow wrapping of spans */
+    overflow-y: auto; /* Add vertical scroll when needed */
+    overflow-x: hidden; /* Hide the horizontal overflow */
+    scrollbar-width: thin; 
+  
+    scrollbar-color: #888 #f1f1f1; 
+  
+    &::-webkit-scrollbar {
+      width: 5px; 
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #888; 
+      border-radius: 5px; 
+    }
+  
+    &::-webkit-scrollbar-track {
+      background-color: #f1f1f1; 
+    }
   }
 
   .hidden {
@@ -66,7 +85,7 @@ body{
   
   .container span {
     background: rgba(167, 193, 209, 0.7);
-    height: 600px;
+    height: 590px;
     width: 300px;
     cursor: pointer;
     color: black ;

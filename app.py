@@ -142,10 +142,10 @@ def chatbot():
     return render_template("chatbot.html")
 
 
-@app.route('/doc')
-def doc():
+@app.route('/DV')
+def DV():
     """Route for the documentation page"""
-    return render_template('doc.html')
+    return render_template('DV.html')
 
 @app.route("/research")
 def research():
