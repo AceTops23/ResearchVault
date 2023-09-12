@@ -84,7 +84,7 @@
                                         <input type="search" id="search-input" placeholder="SEARCH" value="{{ search_query }}">
                                         <button type="submit" id="search-button">SEARCH</button>
                                         {% for item in items %}
-                                        <a class="browse-item" href="{{ url_for('publication_detail', item_id=item.id) }}" data-subjectArea="{{ item.subjectArea }}">
+                                        <a class="browse-item" href="{{ url_for('DV', item_id=item.id) }}" data-subjectArea="{{ item.subjectArea }}">
                                             {{ item.title }} - {{ item.year }}
                                             <p>Authors: {{ item.authors }}</p>
                                         </a>
