@@ -9,10 +9,12 @@ import openai
 import spacy
 import io
 import torch
-import tempfile
 from PyPDF2 import PdfFileReader, PdfFileWriter
+from flask import redirect, url_for
 from PyPDF2 import PageObject
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -32,8 +34,13 @@ app.secret_key = secrets.token_hex(16)
 nlp = spacy.load("en_core_web_sm")
 DB = 'database.db'
 
+# Load the BERT model and tokenizer
+model_path = "Models\BERT Model" 
+tokenizer = BertTokenizer.from_pretrained(model_path)
+bert_model = BertForSequenceClassification.from_pretrained(model_path)
+
 # Set up OpenAI API credentials
-openai.api_key = "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"
+openai.api_key = "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"
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
@@ -171,10 +178,7 @@ def research():
         print("Error browsing publications:", e)
         return render_template('404.html')
 
-@app.route("/abstract")
-def abstract():
-    """Route for rendering the 5 abstract"""
-    return render_template("abstract.html")
+
 
 @app.route("/api", methods=["POST"])
 def api():
@@ -227,15 +231,29 @@ def submit_data():
     filename = save_file(uploaded_file)
 
     if filename:
-        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename, status):  # Pass status to insert_upload function
-            # Insertion successful
+        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename, status):
             print("Upload record inserted successfully!")
-            return "Upload successful!"
+            if status == "Working":
+                return redirect(url_for('abstract', title=title))  # Redirect to 'abstract' route with title
+            else:
+                return "Upload successful!"
         else:
-            # Insertion failed
             print("Failed to insert upload record.")
 
     return "Data submitted successfully!"
+
+
+@app.route('/abstract')
+def abstract():
+    record = db_connection.get_last_unapproved()
+    if record is not None:
+        title = record['title']
+        # ... extract other data from record ...
+        return render_template('abstract.html', title=title)  # Pass data to template
+    else:
+        return "No unapproved records found."
+
+
 
 
 
@@ -334,6 +352,136 @@ def generate_apa_citation(item_id):
 
     return jsonify({"error": "Publication not found"})
 
+def simpleSplit(text, fontName, fontSize, maxWidth):
+    words = text.split(' ')
+    lines = []
+    currentLine = ''
+    for word in words:
+        if stringWidth(currentLine + ' ' + word, fontName, fontSize) <= maxWidth:
+            currentLine += ' ' + word
+        else:
+            lines.append(currentLine)
+            currentLine = word
+    if currentLine:
+        lines.append(currentLine)
+    return lines
+
+
+def convert_to_imrad(file_path):
+    try:
+        with open(file_path, "rb") as f:
+            pdf_reader = PdfFileReader(f)
+            pdf_text = ""
+            
+            for page in pdf_reader.pages:
+                pdf_text += page.extract_text()
+
+        chunk_size = 512
+        text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
+        section_texts = {section: "" for section in section_names.values()}
+
+        # Define batch size
+        batch_size = 10
+
+        # Process text in batches
+        for i in range(0, len(text_chunks), batch_size):
+            batch = text_chunks[i:i+batch_size]
+            inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+            
+            with torch.no_grad():
+                outputs = bert_model(**inputs)
+                predicted_sections = torch.argmax(outputs.logits, dim=1)
+                
+            for j, input_ids in enumerate(inputs["input_ids"]):
+                current_section = section_names[predicted_sections[j].item()]
+                for token in input_ids:
+                    token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                    
+                    if current_section is not None:
+                        if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                            section_texts[current_section] += ' '
+                        
+                        section_texts[current_section] += token_text
+
+                print(f"Section: {current_section}")
+                print(f"Text: {section_texts[current_section]}")
+                print(f"Token: {token_text}")
+
+        converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
+        pdf_writer = PdfFileWriter()
+
+        for section_name, section_text in section_texts.items():
+            # Create a new page
+            page = PageObject.createBlankPage(None, 595.44, 841.68)  # A4 size in points
+            
+            # Add text to the page
+            packet = io.BytesIO()
+            can = canvas.Canvas(packet, pagesize=A4)
+            textobject = can.beginText()
+            
+            # Set a 1-inch margin
+            textobject.setTextOrigin(72, 841.68 - 72)  # A4 size in points, 1 inch = 72 points
+            textobject.setFont("Helvetica", 10)
+            
+            # Add section name
+            textobject.textLine(section_name)
+            
+            # Add section text
+            for line in section_text.split('\n'):
+                # Wrap text if it's too long for one line
+                lines = simpleSplit(line, "Helvetica", 10, 595.44 - 144)  # Subtract margins from page width
+                for l in lines:
+                    textobject.textLine(l)
+            
+            can.drawText(textobject)
+            can.save()
+
+            # Move to the beginning of the StringIO buffer
+            packet.seek(0)
+            new_pdf = PdfFileReader(packet)
+            
+            # Add the "watermark" (which is the new pdf) on the existing page
+            page.mergePage(new_pdf.getPage(0))
+            
+            # Add page to the writer
+            pdf_writer.addPage(page)
+
+        # Write output file
+        with open(converted_file_path, "wb") as out_f:
+            pdf_writer.write(out_f)
+
+        print(f"Converted file saved at {converted_file_path}")
+        return converted_file_path
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
+
+
+# Route to convert a publication to IMRAD format
+@app.route('/convert_to_imrad/<int:item_id>', methods=['GET'])
+def convert_to_imrad_route(item_id):
+    """
+    Route to convert a publication to IMRAD format.
+
+    This route takes the item_id of a publication, converts it to IMRAD format, and returns the converted PDF.
+    """
+    publication = db_connection.get_publication_by_id(item_id)
+    if publication is None:
+        return jsonify({"message": "Publication not found."}), 404
+
+    file_name = os.path.basename(publication['file_path'])
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+    try:
+        # Perform the conversion and get the converted file path
+        converted_file_path = convert_to_imrad(file_path)
+
+        # Update the database with the converted file path
+        db_connection.update_converted_file_path(item_id, converted_file_path)
+
+        # Return the converted PDF for preview in the page
+        return send_file(converted_file_path, as_attachment=False)
+    except Exception as e:
+        return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run()

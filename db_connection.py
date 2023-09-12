@@ -270,3 +270,17 @@ class DBConnection:
             print("Error updating converted file path:", e)
             conn.rollback()
             return False
+
+    def get_last_unapproved(self):
+        try:
+            conn = self.get_db()
+            conn.row_factory = sqlite3.Row  # Use sqlite3.Row to access columns by name
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM uploads WHERE status = 'Working' ORDER BY id DESC LIMIT 1")
+            record = cursor.fetchone()
+            return dict(record) if record else None  # Convert the Row to a dict
+        except Exception as e:
+            print("Error retrieving record:", e)
+            return None
+
+
