@@ -9,7 +9,7 @@ document.getElementById('generate').addEventListener('click', function() {
             break; // Stop after unhiding the first hidden span
         }
     }
-
+    
     // Create a new span element
     var newSpan = document.createElement('span');
     newSpan.classList.add('hidden');
@@ -20,4 +20,19 @@ document.getElementById('generate').addEventListener('click', function() {
 
     // Scroll to the bottom to show the new span (optional)
     spanContainer.scrollTop = spanContainer.scrollHeight;
+
+    // Make an AJAX request to the server
+    fetch('/generate_abstract')
+        .then(response => response.json())
+        .then(section_texts => {
+            // Display each section text in a new span within the container
+            var container = document.querySelector('.container');
+            container.innerHTML = '';  // Clear the container
+            
+            for (var section in section_texts) {
+                var newSpan = document.createElement('span');
+                newSpan.textContent = section + ': ' + section_texts[section];
+                container.appendChild(newSpan);
+            }
+        });
 });

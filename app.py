@@ -14,6 +14,7 @@ from flask import redirect, url_for
 from PyPDF2 import PageObject
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from docx import Document
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
@@ -253,7 +254,48 @@ def abstract():
     else:
         return "No unapproved records found."
 
+@app.route('/generate_abstract')
+def generate_abstract():
+    # Get the last unapproved record
+    record = db_connection.get_last_unapproved()
+    if record is not None:
+        title = record['title']
+        file_path = 'uploads/' + record['file_path']    # Get the file path from the record
 
+        # Open the .docx file and extract the text
+        doc = Document(file_path)  # Use the file path to open the .docx file
+        doc_text = " ".join([p.text for p in doc.paragraphs])
+
+        chunk_size = 512
+        text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size)]
+        section_texts = {section: "" for section in section_names.values()}
+
+        # Define batch size
+        batch_size = 10
+
+        # Process text in batches
+        for i in range(0, len(text_chunks), batch_size):
+            batch = text_chunks[i:i+batch_size]
+            inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+            
+            with torch.no_grad():
+                outputs = bert_model(**inputs)
+                predicted_sections = torch.argmax(outputs.logits, dim=1)
+                
+            for j, input_ids in enumerate(inputs["input_ids"]):
+                current_section = section_names[predicted_sections[j].item()]
+                for token in input_ids:
+                    token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                    
+                    if current_section is not None:
+                        if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                            section_texts[current_section] += ' '
+                        
+                        section_texts[current_section] += token_text
+
+        return jsonify(section_texts)
+    else:
+        return jsonify("No unapproved records found.")
 
 
 
@@ -482,6 +524,8 @@ def convert_to_imrad_route(item_id):
         return send_file(converted_file_path, as_attachment=False)
     except Exception as e:
         return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
+    
+
 
 if __name__ == '__main__':
     app.run()
