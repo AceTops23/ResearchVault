@@ -40,6 +40,19 @@ a{
 .browse-result{
     display: flex;
     height: 80vh;
+    scrollbar-color: #888 #C1D3DF; 
+  
+    &::-webkit-scrollbar {
+      width: 5px; 
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #888; 
+      border-radius: 5px; 
+    }
+  
+    &::-webkit-scrollbar-track {
+      background-color: #f1f1f1; 
+    }
 }
 
 input, select{
