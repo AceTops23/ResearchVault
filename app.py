@@ -7,8 +7,12 @@ import os
 import secrets
 import openai
 import spacy
+import re
 import io
 import torch
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from flask import redirect, url_for
 from PyPDF2 import PageObject
@@ -41,7 +45,7 @@ tokenizer = BertTokenizer.from_pretrained(model_path)
 bert_model = BertForSequenceClassification.from_pretrained(model_path)
 
 # Set up OpenAI API credentials
-openai.api_key = "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"
+openai.api_key = "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"
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
@@ -256,9 +260,11 @@ def abstract():
 
 @app.route('/generate_abstract')
 def generate_abstract():
+    print("Starting to generate abstract...")
     # Get the last unapproved record
     record = db_connection.get_last_unapproved()
     if record is not None:
+        print("Record found, processing...")
         title = record['title']
         file_path = 'uploads/' + record['file_path']    # Get the file path from the record
 
@@ -275,12 +281,14 @@ def generate_abstract():
 
         # Process text in batches
         for i in range(0, len(text_chunks), batch_size):
+            print(f"Processing batch {i//batch_size + 1}...")
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
             
             with torch.no_grad():
                 outputs = bert_model(**inputs)
                 predicted_sections = torch.argmax(outputs.logits, dim=1)
+                
                 
             for j, input_ids in enumerate(inputs["input_ids"]):
                 current_section = section_names[predicted_sections[j].item()]
@@ -292,10 +300,16 @@ def generate_abstract():
                             section_texts[current_section] += ' '
                         
                         section_texts[current_section] += token_text
+                    print(f"output: {section_texts}")
 
+            print(f"Finished processing batch {i//batch_size + 1}.")
+
+        print("Finished processing. Sending response...")
         return jsonify(section_texts)
     else:
+        print("No unapproved records found.")
         return jsonify("No unapproved records found.")
+
 
 
 
@@ -409,6 +423,20 @@ def simpleSplit(text, fontName, fontSize, maxWidth):
     return lines
 
 
+def clean_text(text):
+    # Remove non-alphanumeric characters
+    text = re.sub(r'\W+', ' ', text)
+    
+    # Convert to lowercase
+    text = text.lower()
+    
+    # Remove stopwords
+    stop_words = set(stopwords.words('english'))
+    word_tokens = word_tokenize(text)
+    text = [word for word in word_tokens if not word in stop_words]
+    
+    return ' '.join(text)
+
 def convert_to_imrad(file_path):
     try:
         with open(file_path, "rb") as f:
@@ -417,6 +445,9 @@ def convert_to_imrad(file_path):
             
             for page in pdf_reader.pages:
                 pdf_text += page.extract_text()
+
+        # Clean the extracted text
+        pdf_text = clean_text(pdf_text)
 
         chunk_size = 512
         text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
