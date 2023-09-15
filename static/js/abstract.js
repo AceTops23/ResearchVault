@@ -24,13 +24,15 @@ document.getElementById('generate').addEventListener('click', function() {
     // Make an AJAX request to the server
     fetch('/generate_abstract')
 <<<<<<< HEAD
+=======
+        
     .then(response => response.json())
     .then(section_texts => {
         // Display each section text in a new span within the container
         var container = document.querySelector('#ajax-container');
 
         var newSpan = document.createElement('span');
-        
+      
         for (var section in section_texts) {
             newSpan.textContent += section + ': ' + section_texts[section] + ' ';
         }
@@ -39,18 +41,3 @@ document.getElementById('generate').addEventListener('click', function() {
         container.innerHTML += '<br>';  // Add a line break after each abstract
     });
 });
-=======
-        .then(response => response.json())
-        .then(section_texts => {
-            // Display each section text in a new span within the container
-            var container = document.querySelector('.container');
-            container.innerHTML = '';  // Clear the container
-            
-            for (var section in section_texts) {
-                var newSpan = document.createElement('span');
-                newSpan.textContent = section + ': ' + section_texts[section];
-                container.appendChild(newSpan);
-            }
-        });
-});
->>>>>>> parent of 889c126 (seperate docx and pdf)

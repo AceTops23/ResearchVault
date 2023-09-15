@@ -300,7 +300,11 @@ def generate_abstract():
                             section_texts[current_section] += ' '
                         
                         section_texts[current_section] += token_text
+                    print(f"output: {section_texts}")
 
+            print(f"Finished processing batch {i//batch_size + 1}.")
+
+        print("Finished processing. Sending response...")
         return jsonify(section_texts)
     else:
         print("No unapproved records found.")
