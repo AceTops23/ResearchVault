@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Researchvault</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/abstract.css') }}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    
-
     <a href="/publish"><i class='bx bx-chevron-left'></i></a>
     <div class="container">
-
         <h1>{{ title }}</h1> 
+<<<<<<< HEAD
+        <div id="ajax-container" class="span-container">
+            <!-- AJAX response will be inserted here -->
+=======
 
         <div class="span-container">
             <span class="hidden"></span>
@@ -22,14 +22,16 @@
             <span class="hidden"></span>
             <span class="hidden"></span>
             <span class="hidden"></span>
+<<<<<<< HEAD
+>>>>>>> parent of 889c126 (seperate docx and pdf)
+=======
+>>>>>>> parent of 889c126 (seperate docx and pdf)
         </div>
-
         <div class="buttons">
             <button id="generate">Generate Abstract</button>
             <button id="submit">Submit</button>
         </div>
     </div>
-      
-      <script src="{{ url_for('static', filename='js/abstract.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/abstract.js') }}"></script>
 </body>
 </html>

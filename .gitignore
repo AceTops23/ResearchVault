@@ -53,3 +53,16 @@ Models/BERT Model-20230912T133733Z-001/BERT Model/tokenizer_config.json
 Models/BERT Model-20230912T133733Z-001/BERT Model/vocab.txt
 __pycache__/db_connection.cpython-311.pyc
 __pycache__/db_connection.cpython-311.pyc
+<<<<<<< HEAD
+uploads/Final Chapters 1-5.docx
+uploads/Research Curriculum.docx
+uploads/Research-Curriculum.pdf
+uploads/Final Chapters 1-5.docx
+uploads/Research Curriculum.docx
+Models/BERT Model-20230912T125749Z-002/BERT Model/optimizer.pt
+Models/BERT Model-20230912T125749Z-002/BERT Model/optimizer.pt
+Models/BERT Model-20230912T125749Z-002/BERT Model/optimizer.pt
+Models/BERT Model-20230912T125749Z-002/BERT Model/optimizer.pt
+Models/BERT Model-20230912T125749Z-002/BERT Model/optimizer.pt
+=======
+>>>>>>> parent of 889c126 (seperate docx and pdf)
