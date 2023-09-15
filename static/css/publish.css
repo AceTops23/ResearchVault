@@ -85,7 +85,8 @@ textarea::placeholder{
     box-shadow: none !important;
   }
 
-.poc-container{
+
+  .poc-container{
     display: flex !important;
     gap: 20px !important;
     justify-content: center !important;
@@ -119,6 +120,7 @@ textarea::placeholder{
     visibility: visible;
 }
 
+  
 label{
     color: rgb(61, 61, 61)!important;
 }

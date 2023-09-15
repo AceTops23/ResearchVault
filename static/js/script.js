@@ -295,6 +295,7 @@ function closeContainer(event) {
 
 // Check login status on "START NOW" button click
 startButton.addEventListener('click', function() {
+  pocContainer.classList.toggle('hidden');
   fetch('/session_state')
     .then(response => {
       if (response.ok) {

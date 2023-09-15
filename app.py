@@ -10,6 +10,7 @@ import spacy
 import re
 import io
 import torch
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize

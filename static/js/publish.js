@@ -88,15 +88,16 @@ function updateYearInputValue() {
 }
 
 // Attach the updateYearInputValue function to the change event of the month input
-  document.getElementById('yearInput').addEventListener('change', updateYearInputValue);
+document.getElementById('yearInput').addEventListener('change', updateYearInputValue);
 
 
-  const submitButton = document.getElementById('submit-publish');
-  const pocContainer = document.getElementById('poc-container');
-  
-  submitButton.addEventListener('click', function(event) {
-    console.log('clicked');
-    pocContainer.classList.toggle('hidden');
-  });
+const submitButton = document.getElementById('submit-publish');
+const pocContainer = document.getElementById('poc-container');
 
-                                                     
+submitButton.addEventListener('click', function(event) {
+  console.log('clicked');
+  pocContainer.classList.toggle('hidden');
+});
+
+                                                   
+document.getElementById('yearInput').addEventListener('change', updateYearInputValue);                                     
