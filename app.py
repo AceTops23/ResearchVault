@@ -12,6 +12,7 @@ import io
 import torch
 import nltk
 from nltk.corpus import stopwords
+from bs4 import BeautifulSoup 
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 from PyPDF2 import PdfFileReader, PdfFileWriter
@@ -273,12 +274,17 @@ def generate_abstract():
         doc = Document(file_path)  # Use the file path to open the .docx file
         doc_text = " ".join([p.text for p in doc.paragraphs])
 
-        chunk_size = 512
-        text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size)]
-        section_texts = {section: "" for section in section_names.values()}
+        # Clean the extracted text
+        soup = BeautifulSoup(doc_text, 'html.parser')
+        cleaned_text = soup.get_text(separator=' ')
+        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Remove extra whitespaces
 
-        # Define batch size
-        batch_size = 10
+        chunk_size = 512
+        text_chunks = [cleaned_text[i:i+chunk_size] for i in range(0, len(cleaned_text), chunk_size)]
+        section_texts = {section: "" for section in section_names.values()}
+                           
+        # Define a larger batch size
+        batch_size = 20  # or any other number that your memory can handle
 
         # Process text in batches
         for i in range(0, len(text_chunks), batch_size):
@@ -301,6 +307,8 @@ def generate_abstract():
                             section_texts[current_section] += ' '
                         
                         section_texts[current_section] += token_text
+                    
+                    section_texts[current_section] = section_texts[current_section].replace(' ##', '')
                     print(f"output: {section_texts}")
 
             print(f"Finished processing batch {i//batch_size + 1}.")
@@ -310,6 +318,7 @@ def generate_abstract():
     else:
         print("No unapproved records found.")
         return jsonify("No unapproved records found.")
+
 
 
 
@@ -480,7 +489,9 @@ def convert_to_imrad(file_path):
                 print(f"Section: {current_section}")
                 print(f"Text: {section_texts[current_section]}")
                 print(f"Token: {token_text}")
-
+        # Clean the extracted text
+        section_texts[current_section] = clean_text(section_texts[current_section])            
+        section_texts[current_section] = section_texts[current_section].replace(' ##', '')                               
         converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
         pdf_writer = PdfFileWriter()
 
