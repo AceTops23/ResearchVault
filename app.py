@@ -5,83 +5,89 @@ It handles routes, templates, and database connections.
 """
 import os
 import secrets
-import openai
-import spacy
 import re
 import io
+import openai
+import spacy
 import torch
-import nltk
-from nltk.corpus import stopwords
+import PyPDF2
+from PyPDF2 import PdfFileReader, PdfFileWriter,PageObject
 from bs4 import BeautifulSoup 
-from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from flask import redirect, url_for
-from PyPDF2 import PageObject
+from flask import redirect, url_for, Flask, render_template, request, jsonify, session, send_file
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from docx import Document
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from docx import Document
 from transformers import BertTokenizer, BertForSequenceClassification
-import PyPDF2
-from flask import Flask, render_template, request, jsonify, session, send_file
 from db_connection import DBConnection
 
 # Mapping of section indices to section names
 section_names = {0: "Introduction", 1: "Method", 2: "Result", 3: "Discussion"}
 
+# Initializing the Flask application
 app = Flask(__name__)
 
-# Generate a secure secret key for the session
+# Generating a secure secret key for the session
 app.secret_key = secrets.token_hex(16)
-# Load the spaCy NLP model for Named Entity Recognition (NER)
+
+# Loading the spaCy NLP model for Named Entity Recognition (NER)
 nlp = spacy.load("en_core_web_sm")
+
+# Setting up the database connection
 DB = 'database.db'
 
-# Load the BERT model and tokenizer
+# Loading the BERT model and tokenizer from a specified path
 model_path = "Models\BERT Model" 
 tokenizer = BertTokenizer.from_pretrained(model_path)
 bert_model = BertForSequenceClassification.from_pretrained(model_path)
 
-# Set up OpenAI API credentials
+# Setting up OpenAI API credentials
 openai.api_key = "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"
 
+# Configuring upload settings for the Flask application
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx'}
-# Specify the full path to database.db
+
+# Specifying the full path to database.db
 db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
-db_connection = DBConnection(db_path)  # Create an instance of DBConnection
+
+# Creating an instance of DBConnection for interacting with the database
+db_connection = DBConnection(db_path)
 
 
 @app.route('/')
 def index():
     """Route for the home page"""
+    # Rendering the home page using a template named 'index.html'
     return render_template('index.html')
-
 
 @app.route('/validate_login', methods=['POST'])
 def validate_login():
     """Route for validating login credentials"""
-    db = DBConnection(db_path)  # Create DBConnection instance
+    # Creating a DBConnection instance for interacting with the database
+    db = DBConnection(db_path)
 
+    # Extracting login data from the request
     data = request.json
     email = data['email']
     password = data['password']
 
-    # Perform login validation using the DBConnection instance
+    # Validating login credentials using the DBConnection instance
     email_exists, password_match = db.validate_login(email, password)
+    
+    # Closing the database connection
     db.close_connection()
 
+    # If both email exists and password matches, store user information in the session
     if email_exists and password_match:
-        # Store user information in the session
         session['email'] = email
         isLoggedIn = True
     else:
         isLoggedIn = False
 
+    # Preparing a response indicating the success of login validation and the login state
     response = {
         'success': email_exists and password_match,
         'emailExists': email_exists,
@@ -89,22 +95,26 @@ def validate_login():
         'isLoggedIn': isLoggedIn
     }
 
+    # Returning the response as JSON
     return jsonify(response)
-
 
 @app.route('/session_state')
 def session_state():
     """Route for retrieving the session state"""
+    # Checking if the user is logged in by looking for 'email' in the session
     isLoggedIn = 'email' in session
+    
+    # Returning the login state as JSON
     return jsonify({'isLoggedIn': isLoggedIn})
-
 
 @app.route('/logout', methods=['POST'])
 def logout():
     """Route for logging out the user"""
-    session.clear()  # Clear the session data
+    # Clearing all data from the session to log out the user
+    session.clear()
+    
+    # Returning a success message as JSON
     return jsonify({'success': True})
-
 
 @app.route('/forget-password')
 def forget_password():
@@ -113,8 +123,8 @@ def forget_password():
 
     This route displays the forget password page where users can request a password reset.
     """
+    # Rendering the forget password page using a template named 'fp.html'
     return render_template('fp.html')
-
 
 @app.route('/browse', methods=['GET'])
 def browse():
@@ -124,86 +134,101 @@ def browse():
     This route handles the browsing of publications based on selected sorting, field, year, and search query.
     """
     try:
+        # Creating a DBConnection instance for interacting with the database
         db_conn = DBConnection('database.db')
 
+        # Extracting query parameters from the request
         selected_sort = request.args.get('sort', 'latest')
         selected_field = request.args.get('field', '')
         selected_year = request.args.get('year', '')
         search_query = request.args.get('search', '')  # Get the search query from the query parameters
 
+        # Fetching publications from the database based on query parameters
         items, unique_subject_areas, unique_years = db_conn.fetch_publications(
             selected_sort, selected_field, selected_year, search_query)
 
+        # Closing the database connection
         db_conn.close_connection()
 
+        # Rendering the browse page with fetched publications and query parameters
         return render_template('browse.html', items=items, subject_areas=unique_subject_areas,
                                unique_years=unique_years, selected_sort=selected_sort,
                                selected_field=selected_field, selected_year=selected_year,
                                search_query=search_query)
     except Exception as e:
         print("Error browsing publications:", e)
+        
+        # Rendering an error page if an exception occurs
         return render_template('404.html')
-
 
 @app.route("/publish")
 def publish():
     """Route for rendering the upload form"""
+    # Rendering the publish page using a template named 'publish.html'
     return render_template("publish.html")
 
 @app.route("/chatbot")
 def chatbot():
     """Route for rendering the chatbot form"""
+    # Rendering the chatbot page using a template named 'chatbot.html'
     return render_template("chatbot.html")
-
 
 @app.route('/DV')
 def DV():
     """Route for the documentation page"""
+    # Rendering the documentation page using a template named 'DV.html'
     return render_template('DV.html')
 
 @app.route("/research")
 def research():
-    """Route for rendering the unapprove docx"""
+    """Route for rendering the unapproved docx"""
     try:
+        # Creating a DBConnection instance for interacting with the database
         db_conn = DBConnection('database.db')
 
+        # Extracting query parameters from the request
         selected_sort = request.args.get('sort', 'latest')
         selected_field = request.args.get('field', '')
         selected_year = request.args.get('year', '')
         search_query = request.args.get('search', '')  # Get the search query from the query parameters
 
+        # Fetching research publications from the database based on query parameters
         items, unique_subject_areas, unique_years = db_conn.fetch_research_publications(
             selected_sort, selected_field, selected_year, search_query)
 
+        # Closing the database connection
         db_conn.close_connection()
 
+        # Rendering the research page with fetched publications and query parameters
         return render_template('research.html', items=items, subject_areas=unique_subject_areas,
                                unique_years=unique_years, selected_sort=selected_sort,
                                selected_field=selected_field, selected_year=selected_year,
                                search_query=search_query)
     except Exception as e:
         print("Error browsing publications:", e)
+        
+        # Rendering an error page if an exception occurs
         return render_template('404.html')
-
-
 
 @app.route("/api", methods=["POST"])
 def api():
     """Route to handle POST requests for the chatbot API"""
-    # Get the message from the POST request
+    # Extracting message from the POST request
     message = request.json.get("message")
-    # Send the message to OpenAI's API and receive the response
+    
+    # Sending the message to OpenAI's API and receiving the response
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "user", "content": message}
         ]
     )
+    
+    # Returning the response message if it exists, otherwise returning an error message
     if completion.choices[0].message is not None:
         return completion.choices[0].message
     else:
         return 'Failed to Generate response!'
-
 
 def save_file(file):
     """
@@ -216,7 +241,6 @@ def save_file(file):
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return filename
     return None
-
 
 @app.route('/submit_data', methods=['POST'])
 def submit_data():
@@ -233,95 +257,133 @@ def submit_data():
     degree = request.form['degree']
     subjectArea = request.form['subjectArea']
     abstract = request.form['abstract']
-    status = request.form['status']  # Extract status from form data
+    
+    # Extracting status from form data
+    status = request.form['status']  
+    
     uploaded_file = request.files['file']
+    
+    # Saving uploaded file and getting its filename
     filename = save_file(uploaded_file)
 
     if filename:
+        # Inserting upload record into database and checking if insertion was successful
         if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename, status):
             print("Upload record inserted successfully!")
+            
             if status == "Working":
-                return redirect(url_for('abstract', title=title))  # Redirect to 'abstract' route with title
+                # Redirecting to 'abstract' route with title if status is "Working"
+                return redirect(url_for('abstract', title=title))  
             else:
                 return "Upload successful!"
+                
         else:
             print("Failed to insert upload record.")
 
     return "Data submitted successfully!"
 
-
 @app.route('/abstract')
 def abstract():
+    """
+    Route for rendering the abstract of the last unapproved record.
+
+    This route fetches the last unapproved record from the database and renders an abstract page with its data.
+    If no unapproved records are found, it returns an error message.
+    """
+    # Fetching the last unapproved record from the database
     record = db_connection.get_last_unapproved()
+    
     if record is not None:
+        # Extracting data from the record
         title = record['title']
         # ... extract other data from record ...
+        
+        # Rendering the abstract page with extracted data
         return render_template('abstract.html', title=title)  # Pass data to template
     else:
+        # Returning an error message if no unapproved records are found
         return "No unapproved records found."
 
+# Defining a route for the generate_abstract function
 @app.route('/generate_abstract')
 def generate_abstract():
+    # Logging the start of the abstract generation process
     print("Starting to generate abstract...")
-    # Get the last unapproved record
+    
+    # Fetching the last unapproved record from the database
     record = db_connection.get_last_unapproved()
+    
+    # If a record is found, proceed with processing
     if record is not None:
         print("Record found, processing...")
-        title = record['title']
-        file_path = 'uploads/' + record['file_path']    # Get the file path from the record
-
-        # Open the .docx file and extract the text
-        doc = Document(file_path)  # Use the file path to open the .docx file
+        
+        # Constructing the file path for the document to be processed
+        file_path = 'uploads/' + record['file_path'] 
+        
+        # Reading the document using python-docx library
+        doc = Document(file_path)
+        
+        # Extracting text from the document and joining paragraphs with a space
         doc_text = " ".join([p.text for p in doc.paragraphs])
-
-        # Clean the extracted text
+        
+        # Cleaning up the extracted text using BeautifulSoup library to remove HTML tags
         soup = BeautifulSoup(doc_text, 'html.parser')
-        cleaned_text = soup.get_text(separator=' ')
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text)  # Remove extra whitespaces
-
+        
+        # Replacing multiple spaces with a single space in the cleaned text
+        cleaned_text = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
+        
+        # Splitting the cleaned text into chunks of 512 characters each for processing by BERT model
         chunk_size = 512
         text_chunks = [cleaned_text[i:i+chunk_size] for i in range(0, len(cleaned_text), chunk_size)]
+        
+        # Initializing a dictionary to store section texts
         section_texts = {section: "" for section in section_names.values()}
-                           
-        # Define a larger batch size
-        batch_size = 20  # or any other number that your memory can handle
-
-        # Process text in batches
+        
+        # Setting batch size for processing by BERT model
+        batch_size = 20
+        
+        # Processing text chunks in batches
         for i in range(0, len(text_chunks), batch_size):
             print(f"Processing batch {i//batch_size + 1}...")
+            
+            # Preparing inputs for BERT model by tokenizing text chunks in current batch
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
             
+            # Running BERT model on inputs and getting outputs without gradient computation (for efficiency)
             with torch.no_grad():
                 outputs = bert_model(**inputs)
+                
+                # Predicting sections for each input by taking argmax of logits from outputs
                 predicted_sections = torch.argmax(outputs.logits, dim=1)
-                
-                
+            
+            # Processing each input in current batch and appending corresponding tokens to predicted sections in section_texts dictionary
             for j, input_ids in enumerate(inputs["input_ids"]):
                 current_section = section_names[predicted_sections[j].item()]
                 for token in input_ids:
                     token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
-                    
                     if current_section is not None:
                         if section_texts[current_section] and not section_texts[current_section].endswith(' '):
                             section_texts[current_section] += ' '
-                        
                         section_texts[current_section] += token_text
-                    
+                        
+                    # Removing unnecessary spaces added by BERT tokenizer (represented as ' ##' in tokenized text)
                     section_texts[current_section] = section_texts[current_section].replace(' ##', '')
-                    print(f"output: {section_texts}")
-
+                    
+                print(f"output: {section_texts}")
+                
             print(f"Finished processing batch {i//batch_size + 1}.")
-
+            
         print("Finished processing. Sending response...")
+        
+        # Returning processed section texts as JSON response
         return jsonify(section_texts)
+    
     else:
         print("No unapproved records found.")
+        
+        # Returning an error message as JSON response if no unapproved records are found
         return jsonify("No unapproved records found.")
-
-
-
-
 
 @app.route('/publication_detail/<int:item_id>')
 def publication_detail(item_id):
@@ -330,21 +392,27 @@ def publication_detail(item_id):
 
     This route fetches the publication details from the database based on the item_id and displays them.
     """
-    # Fetch the publication details from the database based on the item_id
+    # Creating a DBConnection instance for interacting with the database
     db_conn = DBConnection(DB)
+    
+    # Fetching the publication details from the database based on the item_id
     item = db_conn.get_publication_by_id(item_id)
+    
+    # Closing the database connection
     db_conn.close_connection()
 
     if item is not None:
-        # Read the text content of the PDF file using PyPDF2
+        # Constructing the path to the PDF file of the publication
         pdf_path = os.path.join('uploads', item['file_path'])
+        
+        # Reading the text content of the PDF file using PyPDF2
         text_content = read_pdf_text(pdf_path)
 
+        # Rendering the publication detail page with fetched publication details and text content of the PDF file
         return render_template('publication_detail.html', item=item, text_content=text_content)
     else:
-        # Handle the case where the publication with the specified ID is not found
+        # Rendering an error page if the publication with the specified ID is not found
         return render_template('404.html'), 404
-
 
 def read_pdf_text(pdf_path):
     """
@@ -353,15 +421,21 @@ def read_pdf_text(pdf_path):
     This function reads the text content of a PDF file and returns it as a string.
     """
     text_content = ""
+    
+    # Opening the PDF file in binary read mode
     with open(pdf_path, 'rb') as file:
+        # Creating a PdfReader instance for reading the PDF file
         pdf_reader = PyPDF2.PdfReader(file)
+        
+        # Getting the number of pages in the PDF file
         num_pages = len(pdf_reader.pages)
+        
+        # Reading text content from each page of the PDF file and appending it to text_content string
         for page_num in range(num_pages):
             page = pdf_reader.pages[page_num]
             text_content += page.extract_text()
 
     return text_content
-
 
 @app.route('/uploads/<path:filename>')
 def serve_pdf(filename):
@@ -370,9 +444,11 @@ def serve_pdf(filename):
 
     This route serves the specified PDF file from the 'uploads' directory.
     """
+    # Constructing the path to the PDF file
     pdf_path = os.path.join('uploads', filename)
+    
+    # Sending the PDF file as response with 'application/pdf' MIME type
     return send_file(pdf_path, mimetype='application/pdf')
-
 
 def generate_apa_citation_from_data(publication):
     """
@@ -380,10 +456,11 @@ def generate_apa_citation_from_data(publication):
 
     This function takes the publication data and returns the APA citation in the specified format.
     """
-    # Format the authors' names
+    # Splitting authors' names and getting the number of authors
     authors = publication['authors'].split('; ')
     num_authors = len(authors)
 
+    # Formatting authors' names based on the number of authors
     if num_authors == 1:
         formatted_authors = authors[0].split()[-1]
     elif num_authors == 2:
@@ -392,11 +469,10 @@ def generate_apa_citation_from_data(publication):
         formatted_authors = ", ".join(author.split()[-1] for author in authors[:-1])
         formatted_authors += f", & {authors[-1].split()[-1]}"
 
-    # Format the APA citation based on the publication data
+    # Formatting the APA citation based on the publication data
     apa_citation = f"{formatted_authors}. ({publication['year']}). {publication['title']}. {publication['thesisAdvisor']}. {publication['department']}. {publication['degree']}."
 
     return apa_citation
-
 
 @app.route('/generate_apa_citation/<int:item_id>')
 def generate_apa_citation(item_id):
@@ -405,74 +481,109 @@ def generate_apa_citation(item_id):
 
     This route takes the item_id of a publication, generates the APA citation, and returns it as a JSON response.
     """
+    # Creating a DBConnection instance for interacting with the database
     db_conn = DBConnection(DB)
-    # Fetch the publication by its ID from the database
+    
+    # Fetching the publication by its ID from the database
     publication = db_conn.get_publication_by_id(item_id)
 
     if publication:
-        # Generate the APA citation based on the publication data
+        # Generating the APA citation based on the publication data
         apa_citation = generate_apa_citation_from_data(publication)
 
-        # Return the APA citation as a JSON response
+        # Returning the APA citation as a JSON response
         return jsonify({"apa_citation": apa_citation})
 
     return jsonify({"error": "Publication not found"})
 
 def simpleSplit(text, fontName, fontSize, maxWidth):
+    """
+    Function to split text into lines based on font size and maximum width.
+
+    This function splits text into lines such that each line's width does not exceed the specified maximum width.
+    """
     words = text.split(' ')
+    
     lines = []
+    
     currentLine = ''
+    
     for word in words:
         if stringWidth(currentLine + ' ' + word, fontName, fontSize) <= maxWidth:
             currentLine += ' ' + word
         else:
             lines.append(currentLine)
             currentLine = word
+            
     if currentLine:
         lines.append(currentLine)
+        
     return lines
 
-
 def clean_text(text):
-    # Remove non-alphanumeric characters
+    """
+    Function to clean text.
+
+    This function removes non-alphanumeric characters, converts to lowercase, and removes stopwords from text.
+    """
+    
+    # Removing non-alphanumeric characters
     text = re.sub(r'\W+', ' ', text)
     
-    # Convert to lowercase
+    # Converting to lowercase
     text = text.lower()
     
-    # Remove stopwords
+    # Removing stopwords
     stop_words = set(stopwords.words('english'))
+    
     word_tokens = word_tokenize(text)
+    
     text = [word for word in word_tokens if not word in stop_words]
     
     return ' '.join(text)
 
 def convert_to_imrad(file_path):
+    """
+    Function to convert a document to IMRaD format.
+
+    This function reads a PDF file, extracts its text content, cleans the text, splits it into chunks, processes the chunks using a BERT model to predict sections, organizes the chunks into different sections based on predictions, cleans the section texts, and writes the section texts into a new PDF file in IMRaD format.
+    """
     try:
+        # Opening the PDF file in binary read mode
         with open(file_path, "rb") as f:
+            # Creating a PdfReader instance for reading the PDF file
             pdf_reader = PdfFileReader(f)
-            pdf_text = ""
             
+            # Reading text content from each page of the PDF file and appending it to pdf_text string
+            pdf_text = ""
             for page in pdf_reader.pages:
                 pdf_text += page.extract_text()
 
-        # Clean the extracted text
+        # Cleaning the extracted text
         pdf_text = clean_text(pdf_text)
 
         chunk_size = 512
+        
+        # Splitting the cleaned text into chunks of 512 characters each for processing by BERT model
         text_chunks = [pdf_text[i:i+chunk_size] for i in range(0, len(pdf_text), chunk_size)]
+        
+        # Initializing a dictionary to store section texts
         section_texts = {section: "" for section in section_names.values()}
 
-        # Define batch size
+        # Defining batch size for processing by BERT model
         batch_size = 10
 
-        # Process text in batches
+        # Processing text chunks in batches
         for i in range(0, len(text_chunks), batch_size):
+            # Preparing inputs for BERT model by tokenizing text chunks in current batch
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
             
             with torch.no_grad():
+                # Running BERT model on inputs and getting outputs without gradient computation (for efficiency)
                 outputs = bert_model(**inputs)
+                
+                # Predicting sections for each input by taking argmax of logits from outputs
                 predicted_sections = torch.argmax(outputs.logits, dim=1)
                 
             for j, input_ids in enumerate(inputs["input_ids"]):
@@ -489,10 +600,15 @@ def convert_to_imrad(file_path):
                 print(f"Section: {current_section}")
                 print(f"Text: {section_texts[current_section]}")
                 print(f"Token: {token_text}")
-        # Clean the extracted text
+                
+        # Cleaning the extracted text
         section_texts[current_section] = clean_text(section_texts[current_section])            
+        
+        # Removing unnecessary spaces added by BERT tokenizer (represented as ' ##' in tokenized text)
         section_texts[current_section] = section_texts[current_section].replace(' ##', '')                               
+        
         converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.pdf')
+        
         pdf_writer = PdfFileWriter()
 
         for section_name, section_text in section_texts.items():
@@ -502,10 +618,12 @@ def convert_to_imrad(file_path):
             # Add text to the page
             packet = io.BytesIO()
             can = canvas.Canvas(packet, pagesize=A4)
+            
             textobject = can.beginText()
             
             # Set a 1-inch margin
             textobject.setTextOrigin(72, 841.68 - 72)  # A4 size in points, 1 inch = 72 points
+            
             textobject.setFont("Helvetica", 10)
             
             # Add section name
@@ -515,14 +633,17 @@ def convert_to_imrad(file_path):
             for line in section_text.split('\n'):
                 # Wrap text if it's too long for one line
                 lines = simpleSplit(line, "Helvetica", 10, 595.44 - 144)  # Subtract margins from page width
+                
                 for l in lines:
                     textobject.textLine(l)
             
             can.drawText(textobject)
+            
             can.save()
 
             # Move to the beginning of the StringIO buffer
             packet.seek(0)
+            
             new_pdf = PdfFileReader(packet)
             
             # Add the "watermark" (which is the new pdf) on the existing page
@@ -536,13 +657,11 @@ def convert_to_imrad(file_path):
             pdf_writer.write(out_f)
 
         print(f"Converted file saved at {converted_file_path}")
+        
         return converted_file_path
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
-
-
-# Route to convert a publication to IMRAD format
 @app.route('/convert_to_imrad/<int:item_id>', methods=['GET'])
 def convert_to_imrad_route(item_id):
     """
@@ -550,25 +669,29 @@ def convert_to_imrad_route(item_id):
 
     This route takes the item_id of a publication, converts it to IMRAD format, and returns the converted PDF.
     """
+    # Fetching the publication by its ID from the database
     publication = db_connection.get_publication_by_id(item_id)
+    
     if publication is None:
+        # Returning an error message as JSON response if the publication with the specified ID is not found
         return jsonify({"message": "Publication not found."}), 404
 
+    # Constructing the path to the PDF file of the publication
     file_name = os.path.basename(publication['file_path'])
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+    
     try:
-        # Perform the conversion and get the converted file path
+        # Converting the PDF file to IMRaD format and getting the path to the converted file
         converted_file_path = convert_to_imrad(file_path)
 
-        # Update the database with the converted file path
+        # Updating the database with the path to the converted file
         db_connection.update_converted_file_path(item_id, converted_file_path)
 
-        # Return the converted PDF for preview in the page
+        # Returning the converted PDF file as response without attachment (for preview in page)
         return send_file(converted_file_path, as_attachment=False)
     except Exception as e:
+        # Returning an error message as JSON response if an exception occurs during conversion
         return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
-    
-
 
 if __name__ == '__main__':
     app.run()
