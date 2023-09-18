@@ -143,6 +143,12 @@ def browse():
     except Exception as e:
         print("Error browsing publications:", e)
         return render_template('404.html')
+    
+
+@app.route("/fromdocx")
+def fromdocx():
+    """Route for rendering the upload form"""
+    return render_template("fromdocx.html")
 
 
 @app.route("/publish")
