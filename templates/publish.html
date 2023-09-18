@@ -61,23 +61,12 @@
             <div class="col d-flex align-items-center">
                 <!-- Move the form opening tag here -->
                 
+                <form action="/submit_data" method="post" enctype="multipart/form-data" id="unapprove-form"></form>
                   <button id="submit-publish" class="btn btn-primary flex-grow-1">SUBMIT</button>
-    
+                </form>
             </div>
     </div>
-
-
-    <div class="poc-container hidden" id = 'poc-container'>
-        <form action="/submit_data" method="post" enctype="multipart/form-data" id="unapprove-form">
-          <button id="unapprove-publish" class="btn btn-primary flex-grow-1">UNAPPROVE</button>
-        </form>
-        <form action="/submit_data" method="post" enctype="multipart/form-data" id="approve-form">
-          <button id="approve-publish" class="btn btn-primary flex-grow-1">APPROVE</button>
-        </form>
-    </div>
-
-
-
+  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/publish.js') }}"></script>
 </body>

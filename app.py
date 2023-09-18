@@ -160,6 +160,12 @@ def browse():
         
         # Rendering an error page if an exception occurs
         return render_template('404.html')
+    
+
+@app.route("/fromdocx")
+def fromdocx():
+    """Route for rendering the upload form"""
+    return render_template("fromdocx.html")
 
 @app.route("/publish")
 def publish():
