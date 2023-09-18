@@ -346,14 +346,18 @@ chatbotbtn.addEventListener('click', function(event) {
     });
 });
 
-document.getElementById('chapter3').addEventListener('click', function() {
+document.getElementById('chapter3').addEventListener('click', function(event) {
+  event.preventDefault();  // This line prevents the default action
   fetch('/get_last_unapproved')
   .then(response => response.json())
   .then(data => {
-      if (data.abstract) {
+      if (data === null) {
+          window.location.href = '/fromdocx';
+      } else if (data && data.abstract) {
           window.location.href = '/fromdocx';
       } else {
           window.location.href = '/abstract';
       }
   });
 });
+

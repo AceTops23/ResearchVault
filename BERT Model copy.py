@@ -1,111 +1,103 @@
 import pandas as pd
-import torch
-import os
-from transformers import BertTokenizer, BertForSequenceClassification, AdamW
+import numpy as np
+import re
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report, confusion_matrix
-from torch.utils.data import DataLoader, TensorDataset
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
+from sklearn.utils import resample
+from imblearn.over_sampling import SMOTE
+from joblib import dump
+import random
+import os
+import tensorflow as tf
 
-# Load and preprocess your IMRAD dataset
-file_paths = ['dataset/A SYLLABUS GENERATOR FOR THE COLLEGE.csv',]
+def set_seed(seed_value):
+    """Set seed for reproducibility."""
+    np.random.seed(seed_value)
+    random.seed(seed_value)
+    os.environ["PYTHONHASHSEED"] = str(seed_value)
 
+    # If using tensorflow
+    tf.random.set_seed(seed_value)
+
+# Set a seed value for reproducibility
+print("Setting seed...")
+set_seed(42)
+
+# Define file paths to your CSV data
+file_paths = ['dataset/A SYLLABUS GENERATOR FOR THE COLLEGE.csv']
+
+# Load the data from the CSV files
+print("Loading data...")
 imrad_data = pd.concat([pd.read_csv(path, encoding='Windows-1252') for path in file_paths], ignore_index=True)
 
-# Drop rows with missing 'imrad_section' values
+# Drop rows with missing labels from the data
+print("Cleaning data...")
 imrad_data.dropna(subset=['Label'], inplace=True)
 
-# Assuming you have 'text' and 'imrad_section' columns in your CSV file
+# Convert the text data and labels to lists for processing
 text_data = imrad_data['Text'].astype(str).tolist()
 imrad_labels = imrad_data['Label'].tolist()
 
-# Map IMRAD labels to numerical values
+# Map the labels to numerical values
 imrad_label_map = {'Introduction': 0, 'Method': 1, 'Result': 2, 'Discussion': 3}
 imrad_labels = [imrad_label_map[label] for label in imrad_labels]
 
-# Load pre-trained BERT tokenizer and model
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=4)
+# Preprocess the text data by removing special characters and numbers
+print("Preprocessing data...")
+text_data = [re.sub(r'\W', ' ', str(x)) for x in text_data]
 
-# Tokenize and preprocess data
-encoded_data = tokenizer(text_data, padding=True, truncation=True, return_tensors='pt')
-input_ids = encoded_data['input_ids']
-attention_mask = encoded_data['attention_mask']
+# Extract features from the text data using TF-IDF vectorization
+print("Extracting features...")
+vectorizer = TfidfVectorizer(max_features=1000)
+X = vectorizer.fit_transform(text_data)
 
-# Convert labels to PyTorch tensor
-labels = torch.Tensor(imrad_labels)
+# Handle class imbalance in the data using SMOTE oversampling
+print("Handling class imbalance...")
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X, imrad_labels)
 
-# Create data loader
-dataset = TensorDataset(input_ids, attention_mask, labels)
-train_size = int(0.8 * len(dataset))
-test_size = len(dataset) - train_size
-train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+# Split the resampled data into training and testing sets
+print("Splitting data...")
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
 
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=16)  # Define the test_loader
+# Define a parameter grid for hyperparameter tuning using GridSearchCV
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth' : [None, 5, 10],
+    'min_samples_split' : [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': ['auto', 'sqrt']
+}
 
-# Define optimizer and loss function
-optimizer = AdamW(model.parameters(), lr=1e-5)
-loss_fn = torch.nn.CrossEntropyLoss()
+# Train a RandomForestClassifier model using GridSearchCV for hyperparameter tuning
+print("Training model...")
+cv = StratifiedKFold(n_splits=5)
+grid_search = GridSearchCV(RandomForestClassifier(), param_grid, cv=cv)
+grid_search.fit(X_train, y_train)
 
-# Training loop
-num_epochs = 10
-for epoch in range(num_epochs):
-    model.train()
-    total_loss = 0
-    for batch in train_loader:
-        optimizer.zero_grad()
-        input_ids_batch, attention_mask_batch, labels_batch = batch
-        outputs = model(input_ids_batch, attention_mask=attention_mask_batch)
-        logits = outputs.logits
-        loss = loss_fn(logits, labels_batch.long())  # Cast labels to Long data type
-        total_loss += loss.item()
-        loss.backward()
-        optimizer.step()
-    print(f"Epoch {epoch+1}, Loss: {total_loss:.4f}")
+# Use the best estimator from GridSearchCV to make predictions on the test set
+print("Making predictions...")
+model = grid_search.best_estimator_
+y_pred = model.predict(X_test)
 
-# Evaluation
-model.eval()
-correct = 0
-total = 0
-predicted_labels_list = []
-true_labels_list = []
+# Group consecutive segments with the same label for post-processing analysis
+print("Grouping segments...")
+from itertools import groupby
+grouped_segments = [(label, list(group)) for label, group in groupby(zip(X_test, y_pred), lambda x: x[1])]
 
-with torch.no_grad():
-    for batch in test_loader:
-        input_ids_batch, attention_mask_batch, labels_batch = batch
-        outputs = model(input_ids_batch, attention_mask=attention_mask_batch)
-        predicted_labels = outputs.logits.argmax(dim=1)
-        # Collect predicted and true labels for later evaluation
-        predicted_labels_list.extend(predicted_labels.tolist())
-        true_labels_list.extend(labels_batch.tolist())
-        
-        total += labels_batch.size(0)
-        correct += (predicted_labels == labels_batch).sum().item()
-        # Print the shape and content of predicted_sections
-        print("Predicted Labels Shape:", predicted_labels.shape)
-        print("Predicted Labels Content:", predicted_labels)
-        
-        # Collect predicted and true labels for later evaluation
-        predicted_labels_list.extend(predicted_labels.tolist())
-        true_labels_list.extend(labels_batch.tolist())
-
-
-accuracy = correct / total
-print(f"Test Accuracy: {accuracy:.4f}")
-
-# Calculate precision, recall, F1-score
-report = classification_report(true_labels_list, predicted_labels_list, target_names=imrad_label_map.keys())
+# Evaluate the model's performance using a classification report and confusion matrix
+print("Evaluating model...")
+report = classification_report(y_test, y_pred)
 print("Classification Report:\n", report)
 
-# Generate confusion matrix
-
-conf_matrix = confusion_matrix(true_labels_list, predicted_labels_list)
+conf_matrix = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:\n", conf_matrix)
 
-# Save the entire model
-save_dir = "models/BERT Model"  
-model.save_pretrained(save_dir)
-tokenizer.save_pretrained(save_dir)  # Save the tokenizer too
-torch.save(optimizer.state_dict(), os.path.join(save_dir, 'optimizer.pt'))  # Save optimizer state
-torch.save(loss_fn.state_dict(), os.path.join(save_dir, 'loss_fn.pt'))  # Save loss function state
-torch.save({'epoch': epoch+1, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'loss': total_loss}, os.path.join(save_dir, 'checkpoint.pth'))  # Save training checkpoint
-print(f"Trained model and related components saved to {save_dir}")
+# Save the trained model and vectorizer for future use
+print("Saving model and vectorizer...")
+dump(model, 'random_forest.joblib') 
+dump(vectorizer, 'tfidf_vectorizer.joblib')
+
+print("Done!")

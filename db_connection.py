@@ -25,8 +25,14 @@ class DBConnection:
         return cursor.fetchall()
 
     def insert_into_working(self, title, file_path):
-        query = "INSERT INTO working (title, File_Path) VALUES (?, ?)"
-        self.execute_query(query, (title, file_path))
+        try:
+            query = "INSERT INTO working (title, File_Path) VALUES (?, ?)"
+            self.execute_query(query, (title, file_path))
+            return True  # Return True if insertion was successful
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return False  # Return False if an error occurred
+
 
     def close_connection(self):
         db = getattr(g, '_database', None)

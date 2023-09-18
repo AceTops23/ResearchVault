@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         // Handle any response data if needed
         alert("Upload successful!");
-        window.location.href = "/abstract"; // Redirect to index.html
+        window.location.href = "/"; // Redirect to abstract.html
       })
       .catch((error) => {
         // Handle any errors that occurred during the request

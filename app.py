@@ -23,6 +23,16 @@ from docx import Document
 from werkzeug.utils import secure_filename
 from transformers import BertTokenizer, BertForSequenceClassification
 from db_connection import DBConnection
+import numpy as np
+from joblib import load
+from collections import Counter
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+model = load('random_forest.joblib')
+vectorizer = load('tfidf_vectorizer.joblib')
+
 
 # Mapping of section indices to section names
 section_names = {0: "Introduction", 1: "Method", 2: "Result", 3: "Discussion"}
@@ -249,7 +259,7 @@ def submit_data():
     """
     Route to handle form submission.
 
-    This route handles form submission from 'publish.html' or any other page.
+    This route handles form submission from 'publish.html'.
     """
     title = request.form['title']
     authors = request.form['authors']
@@ -278,42 +288,51 @@ def submit_data():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     """
-    Route for handling file uploads.
+    Route to handle form upload.
 
-    This route handles file uploads from the 'fromdocs.html' page. It gets the title and file from the form data,
-    checks if both are provided and if the uploaded file is a .docx file. If these conditions are met, it saves
-    the uploaded file in a specified upload folder and inserts the title and file path into the "working" table
-    in your database. Finally, it redirects to another route that presumably handles the uploaded file.
+    This route handles form upload from 'fromdocx.html'.
     """
-    # Get the title from the form data
-    title = request.form.get('title')
-    # Get the file from the form data
-    file = request.files.get('file')
+    try:
+        # Get the title from the form data
+        title = request.form.get('title')
+        # Get the file from the form data
+        file = request.files.get('file')
 
-    # Check if both title and file are provided
-    if not title or not file:
-        return 'Please fill in all fields.', 400
+        # Check if both title and file are provided
+        if not title or not file:
+            return 'Please fill in all fields.', 400
 
-    # Check if the uploaded file is a .docx file
-    if not file.filename.endswith('.docx'):
-        return 'Invalid file type. Please upload a .docx file.', 400
+        # Check if the uploaded file is a .docx file
+        if not file.filename.endswith('.docx'):
+            return 'Invalid file type. Please upload a .docx file.', 400
 
-    # Secure the filename and get the path to save the file
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # Secure the filename and get the path to save the file
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    # Save the uploaded file to the specified path
-    file.save(file_path)
+        # Save the uploaded file to the specified path
+        file.save(file_path)
 
-    # Create a DBConnection instance and insert the title and file path into the "working" table
-    db_conn = DBConnection('database.db')
-    db_conn.insert_into_working(title, file_path)
+        # Create a DBConnection instance and insert the title and file path into the "working" table
+        db_conn = DBConnection('database.db')
+        
+        if filename:
+            # Inserting upload record into database and checking if insertion was successful
+            if db_conn.insert_into_working(title, file_path):
+                print("Upload record inserted successfully!")
+                return "Upload successful!"
+            else:
+                print("Failed to insert upload record.")
+                return "Upload failed.", 500
 
-    # Close the database connection
-    db_conn.close_connection()
+        db_conn.close_connection()
 
-    # Redirect to another route that handles the uploaded file
-    return redirect(url_for('uploaded_file', filename=filename))
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return "An error occurred while processing your request.", 500
+
+    return "Data submitted successfully!"
+
 
 @app.route('/abstract')
 def abstract():
@@ -342,86 +361,71 @@ def get_last_unapproved_route():
     record = db_connection.get_last_unapproved()
     return jsonify(record)
 
+# Define the custom order
+section_order = ['Introduction', 'Method', 'Result', 'Discussion']
+
 # Defining a route for the generate_abstract function
 @app.route('/generate_abstract')
 def generate_abstract():
-    # Logging the start of the abstract generation process
+    threshold = 0.6
     print("Starting to generate abstract...")
-    
-    # Fetching the last unapproved record from the database
     record = db_connection.get_last_unapproved()
-    
-    # If a record is found, proceed with processing
+
     if record is not None:
         print("Record found, processing...")
-        
-        # Constructing the file path for the document to be processed
-        file_path = 'uploads/' + record['file_path'] 
-        
-        # Reading the document using python-docx library
+        file_path = record['file_path'] 
         doc = Document(file_path)
-        
-        # Extracting text from the document and joining paragraphs with a space
         doc_text = " ".join([p.text for p in doc.paragraphs])
-        
-        # Cleaning up the extracted text using BeautifulSoup library to remove HTML tags
         soup = BeautifulSoup(doc_text, 'html.parser')
-        
-        # Replacing multiple spaces with a single space in the cleaned text
         cleaned_text = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
-        
-        # Splitting the cleaned text into chunks of 512 characters each for processing by BERT model
         chunk_size = 512
         text_chunks = [cleaned_text[i:i+chunk_size] for i in range(0, len(cleaned_text), chunk_size)]
-        
-        # Initializing a dictionary to store section texts
         section_texts = {section: "" for section in section_names.values()}
-        
-        # Setting batch size for processing by BERT model
+        section_texts['Other'] = ""
         batch_size = 20
-        
-        # Processing text chunks in batches
+
         for i in range(0, len(text_chunks), batch_size):
             print(f"Processing batch {i//batch_size + 1}...")
-            
-            # Preparing inputs for BERT model by tokenizing text chunks in current batch
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
-            
-            # Running BERT model on inputs and getting outputs without gradient computation (for efficiency)
+
             with torch.no_grad():
                 outputs = bert_model(**inputs)
-                
-                # Predicting sections for each input by taking argmax of logits from outputs
                 predicted_sections = torch.argmax(outputs.logits, dim=1)
-            
-            # Processing each input in current batch and appending corresponding tokens to predicted sections in section_texts dictionary
+
+            # Initialize a dictionary to store the maximum probabilities for each section
+            max_probs = {section: 0 for section in section_order}
+            max_probs['Other'] = 0
+
+            # After getting the predictions
             for j, input_ids in enumerate(inputs["input_ids"]):
-                current_section = section_names[predicted_sections[j].item()]
-                for token in input_ids:
-                    token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
-                    if current_section is not None:
-                        if section_texts[current_section] and not section_texts[current_section].endswith(' '):
-                            section_texts[current_section] += ' '
-                        section_texts[current_section] += token_text
-                        
-                    # Removing unnecessary spaces added by BERT tokenizer (represented as ' ##' in tokenized text)
-                    section_texts[current_section] = section_texts[current_section].replace(' ##', '')
-                    
-                print(f"output: {section_texts}")
-                
-            print(f"Finished processing batch {i//batch_size + 1}.")
+                # Get the maximum probability and its corresponding section
+                max_prob, predicted_section = torch.max(outputs.logits[j]), predicted_sections[j].item()
+                current_section = section_names[predicted_section]
+
+                # Check if the maximum probability is below the threshold
+                if max_prob.item() < threshold:
+                    current_section = 'Other'
+
+                # Decode the entire batch of tokens at once
+                token_text = tokenizer.decode(input_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True)
+
+                # Only add to the section if it's not already present or if the current probability is higher than the previous maximum
+                if current_section not in section_texts[current_section] or max_prob.item() > max_probs[current_section]:
+                    # Remove the section name and a colon before the decoded text
+                    section_texts[current_section] = f"\n\n{token_text}"
+                    max_probs[current_section] = max_prob.item()
+
+                section_texts[current_section] = section_texts[current_section].replace(' ##', '')
+
+            # Create a list of text strings with the sections in your desired order
+            sorted_section_texts = [section_texts[section] for section in section_order if section in section_texts]
             
-        print("Finished processing. Sending response...")
-        
-        # Returning processed section texts as JSON response
-        return jsonify(section_texts)
-    
-    else:
-        print("No unapproved records found.")
-        
-        # Returning an error message as JSON response if no unapproved records are found
-        return jsonify("No unapproved records found.")
+            print("Finished processing. Sending response...")
+            return jsonify(sorted_section_texts)
+
+
+
 
 @app.route('/publication_detail/<int:item_id>')
 def publication_detail(item_id):

@@ -24,6 +24,7 @@ document.getElementById('submit').addEventListener('click', function (event) {
     }).then(response => {
         if (response.ok) {
             alert('File uploaded successfully.');
+            window.location.href = "/abstract"; // Redirect to abstract.html
         } else {
             alert('File upload failed.');
         }
