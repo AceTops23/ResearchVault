@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const approveForm = document.querySelector("#approve-form");
-  const unapproveForm = document.querySelector('#unapprove-form');
+  const submitFormButton = document.querySelector("#submit-publish");
   const fileInput = document.querySelector("#fileInput");
 
-  function submitForm(event, status) {
+  function submitForm(event) {
     event.preventDefault();
 
     const title = document.querySelector("#title").value;
@@ -23,12 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Check if the selected file is a DOCX or PDF
-    if (status === "Published" && file.type !== "application/pdf") {
-      alert("Please select a PDF file.");
-      return; // Stop form submission if the file is not a PDF
-    } else if (status === "Working" && file.type !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-      alert("Please select a DOCX file.");
-      return; // Stop form submission if the file is not a DOCX
+    if (file.type !== "application/pdf" && file.type !== "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      alert("Please select a DOCX or PDF file.");
+      return; // Stop form submission if the file is not a DOCX or PDF
     }
 
     const formData = new FormData();
@@ -41,9 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
     formData.append("subjectArea", subjectArea);
     formData.append("abstract", abstract);
     formData.append("file", file);
-    
-    // Add status to form data
-    formData.append("status", status);
 
     fetch("/submit_data", {
       method: "POST",
@@ -61,14 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  unapproveForm.addEventListener("submit", function (event) {
-    submitForm(event, "Working");
-  });
-
-  approveForm.addEventListener("submit", function (event) {
-    submitForm(event, "Published");
-  });
+  submitFormButton.addEventListener("click", submitForm);
 });
+
 
 
 $(document).ready(function() {

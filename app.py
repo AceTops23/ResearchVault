@@ -20,6 +20,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from docx import Document
+from werkzeug.utils import secure_filename
 from transformers import BertTokenizer, BertForSequenceClassification
 from db_connection import DBConnection
 
@@ -165,6 +166,7 @@ def browse():
 @app.route("/fromdocx")
 def fromdocx():
     """Route for rendering the upload form"""
+    # Rendering the fromdocx page using a template named 'fromdocx.html'
     return render_template("fromdocx.html")
 
 @app.route("/publish")
@@ -193,28 +195,22 @@ def research():
         db_conn = DBConnection('database.db')
 
         # Extracting query parameters from the request
-        selected_sort = request.args.get('sort', 'latest')
-        selected_field = request.args.get('field', '')
-        selected_year = request.args.get('year', '')
         search_query = request.args.get('search', '')  # Get the search query from the query parameters
 
         # Fetching research publications from the database based on query parameters
-        items, unique_subject_areas, unique_years = db_conn.fetch_research_publications(
-            selected_sort, selected_field, selected_year, search_query)
+        items = db_conn.fetch_research_publications(search_query)
 
         # Closing the database connection
         db_conn.close_connection()
 
         # Rendering the research page with fetched publications and query parameters
-        return render_template('research.html', items=items, subject_areas=unique_subject_areas,
-                               unique_years=unique_years, selected_sort=selected_sort,
-                               selected_field=selected_field, selected_year=selected_year,
-                               search_query=search_query)
+        return render_template('research.html', items=items, search_query=search_query)
     except Exception as e:
         print("Error browsing publications:", e)
         
         # Rendering an error page if an exception occurs
         return render_template('404.html')
+
 
 @app.route("/api", methods=["POST"])
 def api():
@@ -263,30 +259,61 @@ def submit_data():
     degree = request.form['degree']
     subjectArea = request.form['subjectArea']
     abstract = request.form['abstract']
-    
-    # Extracting status from form data
-    status = request.form['status']  
-    
+
     uploaded_file = request.files['file']
-    
+
     # Saving uploaded file and getting its filename
     filename = save_file(uploaded_file)
 
     if filename:
         # Inserting upload record into database and checking if insertion was successful
-        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename, status):
+        if db_connection.insert_upload(title, authors, publicationDate, thesisAdvisor, department, degree, subjectArea, abstract, filename):
             print("Upload record inserted successfully!")
-            
-            if status == "Working":
-                # Redirecting to 'abstract' route with title if status is "Working"
-                return redirect(url_for('abstract', title=title))  
-            else:
-                return "Upload successful!"
-                
+            return "Upload successful!"
         else:
             print("Failed to insert upload record.")
 
     return "Data submitted successfully!"
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    """
+    Route for handling file uploads.
+
+    This route handles file uploads from the 'fromdocs.html' page. It gets the title and file from the form data,
+    checks if both are provided and if the uploaded file is a .docx file. If these conditions are met, it saves
+    the uploaded file in a specified upload folder and inserts the title and file path into the "working" table
+    in your database. Finally, it redirects to another route that presumably handles the uploaded file.
+    """
+    # Get the title from the form data
+    title = request.form.get('title')
+    # Get the file from the form data
+    file = request.files.get('file')
+
+    # Check if both title and file are provided
+    if not title or not file:
+        return 'Please fill in all fields.', 400
+
+    # Check if the uploaded file is a .docx file
+    if not file.filename.endswith('.docx'):
+        return 'Invalid file type. Please upload a .docx file.', 400
+
+    # Secure the filename and get the path to save the file
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # Save the uploaded file to the specified path
+    file.save(file_path)
+
+    # Create a DBConnection instance and insert the title and file path into the "working" table
+    db_conn = DBConnection('database.db')
+    db_conn.insert_into_working(title, file_path)
+
+    # Close the database connection
+    db_conn.close_connection()
+
+    # Redirect to another route that handles the uploaded file
+    return redirect(url_for('uploaded_file', filename=filename))
 
 @app.route('/abstract')
 def abstract():
@@ -309,6 +336,11 @@ def abstract():
     else:
         # Returning an error message if no unapproved records are found
         return "No unapproved records found."
+    
+@app.route('/get_last_unapproved')
+def get_last_unapproved_route():
+    record = db_connection.get_last_unapproved()
+    return jsonify(record)
 
 # Defining a route for the generate_abstract function
 @app.route('/generate_abstract')

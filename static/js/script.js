@@ -295,7 +295,6 @@ function closeContainer(event) {
 
 // Check login status on "START NOW" button click
 startButton.addEventListener('click', function() {
-  pocContainer.classList.toggle('hidden');
   fetch('/session_state')
     .then(response => {
       if (response.ok) {
@@ -308,12 +307,16 @@ startButton.addEventListener('click', function() {
       const isLoggedIn = data.isLoggedIn;
       if (!isLoggedIn) {
         promptLogin();
+      } else {
+        // Only toggle 'hidden' class if the user is logged in
+        pocContainer.classList.toggle('hidden');
       }
     })
     .catch(error => {
       console.error('Failed to retrieve session state:', error);
     });
-}); 
+});
+
 
 const chatbotbtn = document.getElementById('chatbot');
 
@@ -341,4 +344,16 @@ chatbotbtn.addEventListener('click', function(event) {
     .catch(error => {
       console.error('Failed to retrieve session state:', error);
     });
+});
+
+document.getElementById('chapter3').addEventListener('click', function() {
+  fetch('/get_last_unapproved')
+  .then(response => response.json())
+  .then(data => {
+      if (data.abstract) {
+          window.location.href = '/fromdocx';
+      } else {
+          window.location.href = '/abstract';
+      }
+  });
 });

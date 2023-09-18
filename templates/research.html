@@ -25,59 +25,6 @@
                 <div class="search-results d-flex flex-column">
                     <div class="container-fluid">
                         <div class="row">
-                            <div class="col-md-2">
-                                <div class="browse-filter">
-                                    <select id="field" class="form-select mb-3" onchange="filterItems()">
-                                        <option value="">Field</option>  <!-- Default option with an empty value -->
-                                        {% for subject_area in subject_areas %}
-                                            <option value="{{ subject_area }}" {% if subject_area == selected_field %}selected{% endif %}>{{ subject_area }}</option>
-                                        {% endfor %}
-                                    </select>                                    
-                                    
-                                    <select id="sort" class="form-select mb-3" onchange="filterItems()">
-                                        <option value="latest" {% if selected_sort == 'latest' %}selected{% endif %}>Latest</option>
-                                        <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest</option>
-                                        <option value="alphabetical" {% if selected_sort == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
-                                    </select>                                    
-                                    
-                                    <input type="number" id="year-input" min="2000" max="2023" step="1" list="year-list" placeholder="Year" class="form-control mb-3" value="{{ selected_year }}" onchange="filterItems()">
-                                    <datalist id="year-list">
-                                        {% for year in unique_years %}
-                                            <option value="{{ year }}">
-                                        {% endfor %}
-                                    </datalist>
-                                </div>
-                            </div>
-
-                            <div class="dropdown">
-                                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class='bx bx-filter'></i>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                  <li>
-                                    <select id="field-dropdown" class="form-select mb-1" onchange="filterItems()">
-                                        <option value="">Field</option>  <!-- Default option with an empty value -->
-                                        {% for subject_area in subject_areas %}
-                                            <option value="{{ subject_area }}" {% if subject_area == selected_field %}selected{% endif %}>{{ subject_area }}</option>
-                                        {% endfor %}
-                                    </select>   
-                                  </li>
-                                  <li>
-                                    <select id="sort-dropdown" class="form-select mb-1" onchange="filterItems()">
-                                        <option value="latest" {% if selected_sort == 'latest' %}selected{% endif %}>Latest</option>
-                                        <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest</option>
-                                        <option value="alphabetical" {% if selected_sort == 'alphabetical' %}selected{% endif %}>Alphabetical</option>
-                                    </select>                                    
-                                    
-                                    <input type="number" id="year-input-dropdown" min="2000" max="2023" step="1" list="year-list" placeholder="Year" class="form-control mb-1" value="{{ selected_year }}" onchange="filterItems()">
-                                    <datalist id="year-list">
-                                        {% for year in unique_years %}
-                                            <option value="{{ year }}">
-                                        {% endfor %}
-                                    </datalist>
-                                  </li>
-                                </ul>
-                              </div>
                               <div class="col-md-10">
                                 <div class="col-md-10">
                                     <div class="browse-result d-flex flex-column">
@@ -85,8 +32,7 @@
                                         <button type="submit" id="search-button">SEARCH</button>
                                         {% for item in items %}
                                         <a class="browse-item" href="{{ url_for('DV', item_id=item.id) }}" data-subjectArea="{{ item.subjectArea }}">
-                                            {{ item.title }} - {{ item.year }}
-                                            <p>Authors: {{ item.authors }}</p>
+                                            {{ item.title }}
                                         </a>
                                         {% endfor %}
                                     </div>
