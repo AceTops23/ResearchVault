@@ -18,7 +18,9 @@ document.getElementById('generate').addEventListener('click', function () {
           // Create a new span for all sections
           var allSectionsSpan = document.createElement('span');
           allSectionsSpan.className = 'abstract';
+          allSectionsSpan.style.textAlign = 'justify';
 
+          
           for (var j = 0; j < sectionOrder.length; j++) {
               var section = sectionOrder[j];
 
@@ -33,7 +35,20 @@ document.getElementById('generate').addEventListener('click', function () {
               }
           }
 
-          // Append the all sections span to the container
+          var accuracyDiv = document.createElement('div');
+          accuracyDiv.className = 'accuracy';
+          accuracyDiv.textContent = 'Accuracy: XX%'; 
+
+          accuracyDiv.style.backgroundColor = 'grey';
+          accuracyDiv.style.color = 'black';
+
+          allSectionsSpan.appendChild(accuracyDiv);
+
+          var abstractDiv = document.createElement('div');
+          abstractDiv.className = 'abstract-container';
+
+          abstractDiv.appendChild(allSectionsSpan);
+
           container.appendChild(allSectionsSpan);
 
           // Add click event listener to the abstract

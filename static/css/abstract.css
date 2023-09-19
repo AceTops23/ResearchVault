@@ -17,8 +17,8 @@ body{
     justify-content: center;
     align-items: center;
     background: rgba(167, 193, 209, 0.7);
-    width: 85%;
-    height: 85%;
+    width: 90%;
+    height: 90%;
     border-radius: 8px;
     padding: 20px;
     gap: 20px; /* Adjust the gap between items as needed */
@@ -132,28 +132,62 @@ body{
     top: 20px;
     left: 20px;
 }
-  
+
+.legend{
+  font-size: 25px;
+  position: absolute;
+  bottom: 25px;
+  left: 85px;
+}
+
+h4, p{
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+#intro{
+  color: #ffbaba;
+}
+
+#method{
+  color: #cafcf9;
+}
+
+#result{
+  color: #cdfadc;
+}
+
+#discussion{
+  color:  rgb(235, 164, 229);
+}
+
 .section.Introduction {
-  background-color: rgb(86, 88, 209);
-  -webkit-text-stroke: 1px rgb(0, 0, 0);
+  background-color: #ffbaba;
+  box-shadow: none;
+  outline: none;
 }
 
 .section.Method {
-  background-color: rgb(106, 172, 106);
-  -webkit-text-stroke: 1px rgb(0, 0, 0);
+  background-color: #cafcf9;
+  box-shadow: none;
+  outline: none;
+  border: none;
 }
 
 .section.Result {
-  background-color: rgb(184, 106, 106);
-  -webkit-text-stroke: 1px rgb(0, 0, 0);
+  background-color: #cdfadc;
+  box-shadow: none;
+  outline: none;
+  border: none;
 }
 
 .section.Discussion {
-  background-color: rgb(122, 92, 156);
-  -webkit-text-stroke: 1px rgb(0, 0, 0);
+  background-color: rgb(235, 164, 229);
+  box-shadow: none;
+  outline: none;
+  border: none;
 }
 
 .abstract.selected {
-  background-color: yellow;
+  background-color: rgb(156, 156, 118);
 }
-
