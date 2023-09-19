@@ -388,40 +388,76 @@ section_order = ['Introduction', 'Method', 'Result', 'Discussion']
 
 @app.route('/generate_abstract')
 def generate_abstract():
+    # Set the threshold for the softmax probability
     threshold = 0.4
+
+    # Start generating the abstract
     print("Starting to generate abstract...")
+
+    # Get the last unapproved record from the database
     record = db_connection.get_last_unapproved()
 
+    # If a record is found, process it
     if record is not None:
         print("Record found, processing...")
+
+        # Get the file path of the document from the record
         file_path = record['file_path'] 
+
+        # Load the document
         doc = Document(file_path)
+
+        # Extract the text from the document and join all paragraphs into a single string
         doc_text = " ".join([p.text for p in doc.paragraphs])
+
+        # Parse the document text as HTML to remove any HTML tags
         soup = BeautifulSoup(doc_text, 'html.parser')
+
+        # Clean up the text by replacing multiple spaces with a single space
         cleaned_text = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
+
+        # Tokenize the cleaned text into sentences
         sentences = sent_tokenize(cleaned_text)
+
+        # Set the maximum size for each chunk of text
         chunk_size = 512
+
+        # Initialize an empty list to store the chunks of text
         text_chunks = []
 
+        # Initialize an empty string to store the current chunk of text
         current_chunk = ""
+
+        # Loop over each sentence in the cleaned text
         for sentence in sentences:
+            # If adding the current sentence to the current chunk does not exceed the maximum chunk size, add it to the current chunk
             if len(current_chunk) + len(sentence) <= chunk_size:
                 current_chunk += " " + sentence
+
+            # If adding the current sentence to the current chunk would exceed the maximum chunk size, add the current chunk to the list of chunks and start a new chunk with the current sentence
             else:
                 text_chunks.append(current_chunk)
                 current_chunk = sentence
 
+        # If there is any text left in the current chunk after processing all sentences, add it to the list of chunks
         if current_chunk:
             text_chunks.append(current_chunk)
 
+        # Initialize a dictionary to store the chunks of text for each section, with an additional section for any chunks that do not fit into any of the predefined sections
         section_texts = {section: [] for section in section_names.values()}
         section_texts['Other'] = []
+
+        # Set the batch size for processing chunks of text
         batch_size = 20
 
         # Classify all chunks first
         for i in range(0, len(text_chunks), batch_size):
             print(f"Classifying batch {i//batch_size + 1}...")
+
+            # Get a batch of chunks from the list of chunks
             batch = text_chunks[i:i+batch_size]
+
+            # Tokenize each chunk in the batch and convert them into input tensors for BERT model
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
 
             with torch.no_grad():
@@ -433,31 +469,29 @@ def generate_abstract():
                 current_section = section_names[predicted_sections[j].item()]
                 section_texts[current_section].append((token_text, outputs.logits[j]))
 
-        # Process each section
         total_probability = 0
         total_chunks = 0
+
         sorted_section_texts = {}
 
-        # Process each section
         for section in section_order:
             if section in section_texts:
                 print(f"Processing section {section}...")
-                # Apply softmax and get top 5 chunks
                 top_chunks = sorted(section_texts[section], key=lambda x: F.softmax(x[1], dim=0).max().item(), reverse=True)[:5]
-                # Randomly select a chunk from the top 5
                 selected_chunk, logits = random.choice(top_chunks)
                 sorted_section_texts[section] = f"\n\n{selected_chunk}"
 
-                # Add the max softmax probability of the selected chunk to the total
                 total_probability += F.softmax(logits, dim=0).max().item()
                 total_chunks += 1
 
-        # Calculate the average probability
         average_probability = total_probability / total_chunks if total_chunks > 0 else 0
+
         print(f"Average probability of chosen chunks: {average_probability}")
 
         print("Finished processing. Sending response...")
-        return jsonify(sorted_section_texts)
+        
+    return jsonify(sorted_section_texts)
+
 
 
 @app.route('/publication_detail/<int:item_id>')
