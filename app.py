@@ -15,7 +15,7 @@ import random
 from PyPDF2 import PdfFileReader, PdfFileWriter,PageObject
 from bs4 import BeautifulSoup 
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 from flask import redirect, url_for, Flask, render_template, request, jsonify, session, send_file
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -399,8 +399,21 @@ def generate_abstract():
         doc_text = " ".join([p.text for p in doc.paragraphs])
         soup = BeautifulSoup(doc_text, 'html.parser')
         cleaned_text = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
+        sentences = sent_tokenize(cleaned_text)
         chunk_size = 512
-        text_chunks = [cleaned_text[i:i+chunk_size] for i in range(0, len(cleaned_text), chunk_size)]
+        text_chunks = []
+
+        current_chunk = ""
+        for sentence in sentences:
+            if len(current_chunk) + len(sentence) <= chunk_size:
+                current_chunk += " " + sentence
+            else:
+                text_chunks.append(current_chunk)
+                current_chunk = sentence
+
+        if current_chunk:
+            text_chunks.append(current_chunk)
+
         section_texts = {section: [] for section in section_names.values()}
         section_texts['Other'] = []
         batch_size = 20
@@ -442,7 +455,6 @@ def generate_abstract():
         # Calculate the average probability
         average_probability = total_probability / total_chunks if total_chunks > 0 else 0
         print(f"Average probability of chosen chunks: {average_probability}")
-
 
         print("Finished processing. Sending response...")
         return jsonify(sorted_section_texts)
