@@ -270,7 +270,12 @@ class DBConnection:
             return None
         
     def update_abstract(self, id, abstract):
-        query = 'UPDATE working SET abstract = ? WHERE id = ?'
-        params = (abstract, id)
-        self.execute_query(query, params)
-
+        try:
+            conn = self.get_db()
+            cursor = conn.cursor()
+            cursor.execute("UPDATE working SET abstract = ? WHERE id = ?", (abstract, id))
+            conn.commit()
+            return True
+        except Exception as e:
+            print("Error updating record:", e)
+            return False

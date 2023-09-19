@@ -53,16 +53,18 @@ document.getElementById('generate').addEventListener('click', function () {
   }
 });
 
+
 document.getElementById('submit').addEventListener('click', function () {
   // Get the selected abstract
   var selectedAbstract = document.querySelector('.abstract.selected');
 
+  // Check if an abstract is selected
   if (selectedAbstract) {
     // Get the text of the selected abstract
     var abstractText = selectedAbstract.textContent;
 
-    // Send a POST request to the server-side route
-    fetch('/update_abstract', {
+    // Send a POST request to the server with the abstract text
+    fetch('/upload_abstract', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -73,7 +75,17 @@ document.getElementById('submit').addEventListener('click', function () {
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data);
+      console.log('Success:', data);
+      if (data.status === 'success') {
+        // Redirect to /fromdocx if the operation was successful
+        window.location.href = '/fromdocx';
+      } else {
+        alert('Operation failed');
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('Operation failed');
     });
   } else {
     console.log('No abstract selected');
