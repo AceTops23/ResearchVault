@@ -153,3 +153,7 @@ body{
   -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
+.abstract.selected {
+  background-color: yellow;
+}
+

@@ -268,5 +268,9 @@ class DBConnection:
         except Exception as e:
             print("Error retrieving record:", e)
             return None
-
+        
+    def update_abstract(self, id, abstract):
+        query = 'UPDATE working SET abstract = ? WHERE id = ?'
+        params = (abstract, id)
+        self.execute_query(query, params)
 

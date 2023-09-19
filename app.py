@@ -362,6 +362,20 @@ def get_last_unapproved_route():
     record = db_connection.get_last_unapproved()
     return jsonify(record)
 
+@app.route('/update_abstract', methods=['POST'])
+def update_abstract_route():
+    # Get the abstract from the request body
+    data = request.get_json()
+    abstract = data['abstract']
+
+    # Get the last unapproved record
+    working = db_connection.get_last_unapproved()
+
+    # Update the 'abstract' column of the record
+    db_connection.update_abstract(working[0]['id'], abstract)
+
+    return jsonify({'status': 'success'})
+
 # Define the custom order
 section_order = ['Introduction', 'Method', 'Result', 'Discussion']
 
