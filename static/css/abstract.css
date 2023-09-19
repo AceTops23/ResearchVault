@@ -92,7 +92,6 @@ body{
     gap: 10px;
     padding: 5px;
     border-radius: 5px;
-    backdrop-filter: blur(10px); 
     box-shadow: 0px 0px 10px 0px black;
     transition: all 0.3s ease-in-out;
     overflow-y: auto; 
@@ -135,19 +134,22 @@ body{
 }
   
 .section.Introduction {
-  color: blue;
+  background-color: rgb(86, 88, 209);
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
 .section.Method {
-  color: green;
+  background-color: rgb(106, 172, 106);
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
 .section.Result {
-  color: red;
+  background-color: rgb(184, 106, 106);
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 
-
 .section.Discussion {
-  color: rgb(81, 17, 153);
+  background-color: rgb(122, 92, 156);
+  -webkit-text-stroke: 1px rgb(0, 0, 0);
 }
 

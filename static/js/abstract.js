@@ -11,22 +11,30 @@ document.getElementById('generate').addEventListener('click', function () {
         // Get the container where you want to append the sections
         var container = document.getElementById('ajax-container');
 
+        // Define the order of the sections
+        var sectionOrder = ['Introduction', 'Method', 'Result', 'Discussion'];
+
         // Create a new span for all sections
         var allSectionsSpan = document.createElement('span');
 
-        for (var section in section_texts) {
-            // Create a new span for each section
-            var sectionSpan = document.createElement('span');
-            sectionSpan.className = `section ${section}`;
-            sectionSpan.textContent = section_texts[section] + ' ';
+        for (var i = 0; i < sectionOrder.length; i++) {
+            var section = sectionOrder[i];
 
-            // Append the section span to the all sections span
-            allSectionsSpan.appendChild(sectionSpan);
+            if (section in section_texts) {
+                // Create a new span for each section
+                var sectionSpan = document.createElement('span');
+                sectionSpan.className = `section ${section}`;
+                sectionSpan.textContent = section_texts[section] + ' ';
+
+                // Append the section span to the all sections span
+                allSectionsSpan.appendChild(sectionSpan);
+            }
         }
 
         // Append the all sections span to the container
         container.appendChild(allSectionsSpan);
     });
+
 
   spanContainer.scrollTop = spanContainer.scrollHeight;
 });
