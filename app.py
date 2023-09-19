@@ -419,7 +419,7 @@ def generate_abstract():
                 section_texts[current_section] = section_texts[current_section].replace(' ##', '')
 
             # Create a list of text strings with the sections in your desired order
-            sorted_section_texts = [section_texts[section] for section in section_order if section in section_texts]
+            sorted_section_texts = {section: section_texts[section] for section in section_order if section in section_texts}
             
             print("Finished processing. Sending response...")
             return jsonify(sorted_section_texts)

@@ -6,22 +6,27 @@ document.getElementById('generate').addEventListener('click', function () {
 
   // Fetch a new abstract
   fetch('/generate_abstract')
-      .then(response => response.json())
-      .then(section_texts => {
-          var abstractText = '';
-          for (var section in section_texts) {
-              abstractText += section_texts[section] + ' ';
-          }
+    .then(response => response.json())
+    .then(section_texts => {
+        // Get the container where you want to append the sections
+        var container = document.getElementById('ajax-container');
 
-          // Update the text content of the new span element
-          newSpan.textContent = abstractText;
+        // Create a new span for all sections
+        var allSectionsSpan = document.createElement('span');
 
-          var lineBreak = document.createElement('br');
-          newSpan.appendChild(lineBreak);
-      });
+        for (var section in section_texts) {
+            // Create a new span for each section
+            var sectionSpan = document.createElement('span');
+            sectionSpan.className = `section ${section}`;
+            sectionSpan.textContent = section_texts[section] + ' ';
 
-  // Append the new span element to the span container
-  spanContainer.appendChild(newSpan);
+            // Append the section span to the all sections span
+            allSectionsSpan.appendChild(sectionSpan);
+        }
+
+        // Append the all sections span to the container
+        container.appendChild(allSectionsSpan);
+    });
 
   spanContainer.scrollTop = spanContainer.scrollHeight;
 });

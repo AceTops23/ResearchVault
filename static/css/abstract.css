@@ -134,4 +134,20 @@ body{
     left: 20px;
 }
   
-  
+.section.Introduction {
+  color: blue;
+}
+
+.section.Method {
+  color: green;
+}
+
+.section.Result {
+  color: red;
+}
+
+
+.section.Discussion {
+  color: rgb(81, 17, 153);
+}
+
