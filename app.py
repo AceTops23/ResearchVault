@@ -11,6 +11,7 @@ import openai
 import spacy
 import torch
 import PyPDF2
+import random
 from PyPDF2 import PdfFileReader, PdfFileWriter,PageObject
 from bs4 import BeautifulSoup 
 from nltk.corpus import stopwords
@@ -24,9 +25,9 @@ from werkzeug.utils import secure_filename
 from transformers import BertTokenizer, BertForSequenceClassification
 from db_connection import DBConnection
 import numpy as np
+import torch.nn.functional as F
 from joblib import load
 from collections import Counter
-
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -361,13 +362,27 @@ def get_last_unapproved_route():
     record = db_connection.get_last_unapproved()
     return jsonify(record)
 
+@app.route('/update_abstract', methods=['POST'])
+def update_abstract_route():
+    # Get the abstract from the request body
+    data = request.get_json()
+    abstract = data['abstract']
+
+    # Get the last unapproved record
+    working = db_connection.get_last_unapproved()
+
+    # Update the 'abstract' column of the record
+    db_connection.update_abstract(working[0]['id'], abstract)
+
+    return jsonify({'status': 'success'})
+
 # Define the custom order
 section_order = ['Introduction', 'Method', 'Result', 'Discussion']
 
-# Defining a route for the generate_abstract function
+
 @app.route('/generate_abstract')
 def generate_abstract():
-    threshold = 0.6
+    threshold = 0.4
     print("Starting to generate abstract...")
     record = db_connection.get_last_unapproved()
 
@@ -380,12 +395,13 @@ def generate_abstract():
         cleaned_text = re.sub(r'\s+', ' ', soup.get_text(separator=' '))
         chunk_size = 512
         text_chunks = [cleaned_text[i:i+chunk_size] for i in range(0, len(cleaned_text), chunk_size)]
-        section_texts = {section: "" for section in section_names.values()}
-        section_texts['Other'] = ""
+        section_texts = {section: [] for section in section_names.values()}
+        section_texts['Other'] = []
         batch_size = 20
 
+        # Classify all chunks first
         for i in range(0, len(text_chunks), batch_size):
-            print(f"Processing batch {i//batch_size + 1}...")
+            print(f"Classifying batch {i//batch_size + 1}...")
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
 
@@ -393,38 +409,37 @@ def generate_abstract():
                 outputs = bert_model(**inputs)
                 predicted_sections = torch.argmax(outputs.logits, dim=1)
 
-            # Initialize a dictionary to store the maximum probabilities for each section
-            max_probs = {section: 0 for section in section_order}
-            max_probs['Other'] = 0
-
-            # After getting the predictions
             for j, input_ids in enumerate(inputs["input_ids"]):
-                # Get the maximum probability and its corresponding section
-                max_prob, predicted_section = torch.max(outputs.logits[j]), predicted_sections[j].item()
-                current_section = section_names[predicted_section]
-
-                # Check if the maximum probability is below the threshold
-                if max_prob.item() < threshold:
-                    current_section = 'Other'
-
-                # Decode the entire batch of tokens at once
                 token_text = tokenizer.decode(input_ids, skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                current_section = section_names[predicted_sections[j].item()]
+                section_texts[current_section].append((token_text, outputs.logits[j]))
 
-                # Only add to the section if it's not already present or if the current probability is higher than the previous maximum
-                if current_section not in section_texts[current_section] or max_prob.item() > max_probs[current_section]:
-                    # Remove the section name and a colon before the decoded text
-                    section_texts[current_section] = f"\n\n{token_text}"
-                    max_probs[current_section] = max_prob.item()
+        # Process each section
+        total_probability = 0
+        total_chunks = 0
+        sorted_section_texts = {}
 
-                section_texts[current_section] = section_texts[current_section].replace(' ##', '')
+        # Process each section
+        for section in section_order:
+            if section in section_texts:
+                print(f"Processing section {section}...")
+                # Apply softmax and get top 5 chunks
+                top_chunks = sorted(section_texts[section], key=lambda x: F.softmax(x[1], dim=0).max().item(), reverse=True)[:5]
+                # Randomly select a chunk from the top 5
+                selected_chunk, logits = random.choice(top_chunks)
+                sorted_section_texts[section] = f"\n\n{selected_chunk}"
 
-            # Create a list of text strings with the sections in your desired order
-            sorted_section_texts = [section_texts[section] for section in section_order if section in section_texts]
-            
-            print("Finished processing. Sending response...")
-            return jsonify(sorted_section_texts)
+                # Add the max softmax probability of the selected chunk to the total
+                total_probability += F.softmax(logits, dim=0).max().item()
+                total_chunks += 1
+
+        # Calculate the average probability
+        average_probability = total_probability / total_chunks if total_chunks > 0 else 0
+        print(f"Average probability of chosen chunks: {average_probability}")
 
 
+        print("Finished processing. Sending response...")
+        return jsonify(sorted_section_texts)
 
 
 @app.route('/publication_detail/<int:item_id>')
