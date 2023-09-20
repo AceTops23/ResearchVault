@@ -10,20 +10,22 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background-color: #598392;
 }
 .container {
+  color: white;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: rgba(167, 193, 209, 0.7);
+    background: #124559;
     width: 90%;
     height: 90%;
     border-radius: 8px;
     padding: 20px;
-    gap: 20px; /* Adjust the gap between items as needed */
-    overflow-y: auto; /* Add scroll when needed */
-    max-height: 1000px; /* Adjust the max height for scroll as needed */
+    gap: 20px; 
+    overflow-y: auto; 
+    max-height: 1000px;
   }
 
   .span-container{
@@ -34,12 +36,12 @@ body{
     align-items: center;
     padding: 10px;
     gap: 20px;
-    flex-wrap: wrap; /* Allow wrapping of spans */
-    overflow-y: auto; /* Add vertical scroll when needed */
-    overflow-x: hidden; /* Hide the horizontal overflow */
+    flex-wrap: wrap;
+    overflow-y: auto;
+    overflow-x: hidden; 
     scrollbar-width: thin; 
   
-    scrollbar-color: #888 #f1f1f1; 
+    scrollbar-color: white #124559; 
   
     &::-webkit-scrollbar {
       width: 5px; 
@@ -50,7 +52,7 @@ body{
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #f1f1f1; 
+      background-color: #124559; 
     }
   }
 
@@ -59,7 +61,7 @@ body{
   }
 
   button{
-    background-color: blue;
+    background-color: #598392;
     color: white;
     border: none;
     padding: 10px;
@@ -70,8 +72,8 @@ body{
 
   button:hover{
     transition: all 0.3s linear;
-    color: white;
-    background: rgb(0, 0, 66);
+    color: black;
+    background: #AEC3B0;
   }
 
   #submit{
@@ -80,11 +82,12 @@ body{
   }
   
   a{
+    color: black;
     text-decoration: none;
   }
   
   .container span {
-    background: rgba(255, 255, 255, 0.7);
+    background: #598392;
     height: 590px;
     width: 300px;
     cursor: pointer;
@@ -98,18 +101,18 @@ body{
     overflow-x: hidden; 
     scrollbar-width: thin; 
   
-    scrollbar-color: #888 #f1f1f1; 
+    scrollbar-color: white #598392; 
   
     &::-webkit-scrollbar {
       width: 5px; 
     }
     &::-webkit-scrollbar-thumb {
-      background-color: #888; 
+      background-color: white; 
       border-radius: 5px; 
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #f1f1f1; 
+      background-color: #598392; 
     }
   }
 
@@ -136,11 +139,12 @@ body{
 .legend{
   font-size: 25px;
   position: absolute;
-  bottom: 25px;
-  left: 85px;
+  bottom: 20px;
+  left: 20px;
 }
 
 h4, p{
+  color: white;
   font-size: 20px;
   opacity: 0.9;
 }
@@ -165,6 +169,7 @@ h4, p{
   background-color: #ffbaba;
   box-shadow: none;
   outline: none;
+  order: 0;
 }
 
 .section.Method {

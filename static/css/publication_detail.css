@@ -5,16 +5,17 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: white !important;
+    background: #598392 !important;
     font-family: 'Poppins', sans-serif;
 }
 
 a{
     text-decoration: none;
-    color: black !important;
+    color: white !important;
 }
 
 i{  
+    color: black !important;
     position: absolute;
     font-size: 25px;
     left: 20px;
@@ -25,11 +26,11 @@ i{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    color: rgb(61, 61, 61)!important;
+    color: white !important;
     align-items: center;
     width: 1300px;
     height: 100%;
-    background: rgba(167, 193, 209, 0.7);
+    background: #124559 !important;
     border-radius: 8px;
     padding: 20px;
 }
@@ -44,7 +45,7 @@ button{
     font-family: 'Poppins', sans-serif;
     letter-spacing: 3px;
     color: white !important;
-    background-color: blue !important;
+    background-color: #598392 !important;
     padding: 5px;
     border: none !important;
     transition: all 0.3s linear;
@@ -53,7 +54,8 @@ button{
 
 button:hover{
     transition: all 0.3s linear;
-    background: rgb(0, 0, 66) !important;
+    background: #AEC3B0 !important;
+    color: black !important;
 }
 
 .apa-citation-container{
@@ -63,17 +65,18 @@ button:hover{
     position: fixed;
     top: 50%;
     left: 50%;
+    color: white !important;
     transform: translate(-50%, -50%);
     border: none;
     padding: 10px;
     text-align: justify;
-    background: rgba(167, 193, 209, 0.7) !important;
+    background: #124559 !important;
     width: 500px;
     height: 200px;
     color: black;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
-    box-shadow: 0 1px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 0 5px 0 black;
     backdrop-filter: blur(10px); 
     transition: opacity 0.3s ease-in-out;
 }

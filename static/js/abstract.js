@@ -23,6 +23,14 @@ document.getElementById('generate').addEventListener('click', function () {
           allSectionsSpan.className = 'abstract';
           allSectionsSpan.style.textAlign = 'justify';
 
+          var accuracyDiv = document.createElement('div');
+          accuracyDiv.className = 'accuracy';
+          accuracyDiv.textContent = 'Accuracy: ' + Math.round(average_probability * 100) + '%'; 
+
+          accuracyDiv.style.backgroundColor = '#598392';
+          accuracyDiv.style.color = 'white';
+
+          allSectionsSpan.appendChild(accuracyDiv);
           
           for (var j = 0; j < sectionOrder.length; j++) {
               var section = sectionOrder[j];
@@ -37,15 +45,6 @@ document.getElementById('generate').addEventListener('click', function () {
                   allSectionsSpan.appendChild(sectionSpan);
               }
           }
-
-          var accuracyDiv = document.createElement('div');
-          accuracyDiv.className = 'accuracy';
-          accuracyDiv.textContent = 'Accuracy: ' + Math.round(average_probability * 100) + '%'; 
-
-          accuracyDiv.style.backgroundColor = 'grey';
-          accuracyDiv.style.color = 'black';
-
-          allSectionsSpan.appendChild(accuracyDiv);
 
           var abstractDiv = document.createElement('div');
           abstractDiv.className = 'abstract-container';

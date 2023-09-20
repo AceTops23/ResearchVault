@@ -4,7 +4,7 @@
 }
 
 body{
-    background-color: white !important;
+    background-color: #598392 !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -30,7 +30,7 @@ i{
     color: white;
     padding: 20px;
     height: 95%;
-    background: rgba(167, 193, 209, 0.7) !important;
+    background: #124559 !important;
     gap: 20px;
     border-radius: 5px;
 }
@@ -41,10 +41,10 @@ i{
     }
 }
 input{
-    color: white;
+    color: white !important;
     border: none;
     padding: 8px;;
-    background-color: rgb(35, 50, 59);
+    background-color: #EFF6E0 !important;
 }
 
 .form-control{
@@ -54,7 +54,7 @@ input{
 }
 
 input::placeholder{
-    color: rgb(182, 174, 174) !important;
+    color: white !important;
 }
 
 .form-control{
@@ -63,12 +63,12 @@ input::placeholder{
 }
 
 textarea::placeholder{
-    color: rgb(182, 174, 174) !important
+    color: white !important
 }
 
 #submit-publish{
     color: white !important;
-    background-color: blue !important; 
+    background-color: #598392 !important; 
     outline: none;
     border: none;
     box-shadow: none;
@@ -77,37 +77,14 @@ textarea::placeholder{
 
 #submit-publish:hover{
     transition: all 0.3s;
-    background: rgb(0, 0, 66) !important;
+    color: black !important;
+    background: #AEC3B0 !important;
 }
 
 .form-control:focus {
     outline: none !important;
     box-shadow: none !important;
   }
-
-
-  .poc-container{
-    display: flex !important;
-    gap: 20px !important;
-    justify-content: center !important;
-    align-items: center !important;
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    border: none !important;
-    padding: 10px;
-    text-align: justify !important;
-    background: rgba(67, 88, 100, 0.7) !important;
-    width: 500px !important;
-    height: 100px !important;
-    color: white !important;
-    border-radius: 8px !important;
-    font-family: 'Poppins', sans-serif !important;
-    box-shadow: 0 1px 25px rgba(0,0,0,0.2) !important;
-    backdrop-filter: blur(10px) !important; 
-    transition: opacity 0.3s ease-in-out !important;
-}
 
 .hidden{
     opacity: 0;
@@ -122,23 +99,5 @@ textarea::placeholder{
 
   
 label{
-    color: rgb(61, 61, 61)!important;
-}
-.poc-container button {
-    width: 200px;
-    border: none;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    letter-spacing: 5px;
-    background: blue !important;
-    cursor: pointer;
-    transition: all 0.3s linear;
-}
-
-.poc-container button:hover{
-    transition: all 0.3s linear;
-    background: rgb(0, 0, 66) !important;
     color: white !important;
-    border: none;
-    cursor: pointer;
 }

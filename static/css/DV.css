@@ -11,7 +11,7 @@ body{
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #8EB2C5;
+    background-color: #598392;
 }
 
 button#comment{
@@ -21,7 +21,7 @@ button#comment{
     font-size: 30px;
     padding: none;
     cursor: pointer;
-    color: black;
+    color: white;
     border: none;
     background-color: transparent;
 }
@@ -38,12 +38,19 @@ button#comment{
 }
 
 .comment-section input{
+    background-color: #627179;
+    color: white;
     padding: 5px;
+}
+
+
+input::placeholder{
+    color: white;
 }
 
 #usercomment{
     margin-top: 5px;
-    background-color: blue;
+    background-color: #598392;
     color: white;
     border: none;
     cursor: pointer;
@@ -54,11 +61,12 @@ button#comment{
 
 #usercomment:hover{
     transition: all 0.3s linear;
-    color: white;
-    background: rgb(0, 0, 66) ;
+    color: black;
+    background: #AEC3B0 ;
     border: none;
 }
 .comment-section{
+    color: white;
     position: absolute;
     top: 5px;
     right: 5px;
@@ -70,7 +78,7 @@ button#comment{
     padding: 20px;
     overflow: auto;
     display: none;
-    background-color: white;
+    background-color: #124559;
     box-shadow: 0 1px 25px rgba(0,0,0,0.2);
     transition: all 0.3s linear;
     z-index: 99;
@@ -80,6 +88,7 @@ button#comment{
     position: absolute;
     top: 15px;
     right: 15px;
+    color: white;
     transition: all 0.3s linear;
 }
 

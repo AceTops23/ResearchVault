@@ -8,25 +8,24 @@ body{
     display: flex;
     padding: 10px;
     height: 100vh;
-    color: rgb(61, 61, 61)!important;
+    color: white !important;
+    background-color: #598392 !important;
 }
 
 .container{
     height: 99%;
     border-radius: 5px;
-    background: rgba(167, 193, 209, 0.7) !important;
-    color: rgb(61, 61, 61)!important;
+    background: #124559 !important;
 }
 
 img{
     max-width: 100%;
     width: 150px;
-
 }
 
 a{
     text-decoration: none !important;
-    color: rgb(61, 61, 61)!important;
+    color: white!important;
     font-size: clamp(0.75rem, 0.2813rem + 1.5vw, 1.125rem);
 }
 
@@ -43,18 +42,18 @@ a{
     overflow-y: scroll;
     scrollbar-width: thin; 
   
-    scrollbar-color: #888 #C1D3DF; 
+    scrollbar-color: white #124559; 
   
     &::-webkit-scrollbar {
       width: 5px; 
     }
     &::-webkit-scrollbar-thumb {
-      background-color: #888; 
+      background-color: white; 
       border-radius: 5px; 
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #C1D3DF; 
+      background-color: #124559; 
     }
   }
 
@@ -80,7 +79,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 #search-button{
-    background-color: blue !important;
+    background-color: #598392 !important;
     border: none !important;
     color: white !important;
     outline: none !important;
@@ -90,8 +89,9 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 #search-button:hover{
+    color: black !important;
     transition: all 0.3s linear;
-    background: rgb(0, 0, 66) !important;
+    background: #AEC3B0 !important;
 }
 
 h3{
@@ -129,8 +129,9 @@ p{
 #field-dropdown,
 #sort-dropdown,
 #year-input-dropdown{
+    outline: none !important;
     background-color: rgba(35, 50, 59, 0) !important;
-    border: none;
+    border: none !important;
 }
 
 .dropdown .form-select {
@@ -172,9 +173,8 @@ p{
 
 /* Add hover effect */
 .browse-item:hover {
-    color: black !important;
     transition: all 0.3s linear;
-    background-color: #8EB2C5; /* Change the background color on hover */
+    background-color: #598392 !important; /* Change the background color on hover */
     border-radius: 5px; /* Add rounded corners on hover */
     padding: 5px; /* Add padding on hover to create a clickable area */
     cursor: pointer; /* Change the cursor on hover to indicate it's clickable */

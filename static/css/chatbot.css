@@ -8,10 +8,12 @@ body{
     justify-content: center;
     flex-direction: column;
     align-items: center;
+    background-color: #598392 !important;
     color: white !important
 }
 
 header{
+    color: white !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -31,39 +33,49 @@ header{
     cursor: pointer;
 }
 
+textarea{
+  background-color: #627179 !important;
+  color: white !important;
+  border: none !important;
+}
+
+textarea::placeholder{
+  color: white !important;
+}
 a{
     text-decoration: none !important;
-    color: rgb(61, 61, 61)!important;
+    color: white !important;
   }
  
 
 .container{
-    background: rgba(167, 193, 209, 0.7) !important;
+    background: #124559 !important;
     width: 1500px;
     height: 850px;
     border-radius: 8px;
     overflow-y: scroll;
     scrollbar-width: thin; 
   
-    scrollbar-color: #888 #C1D3DF; 
+    scrollbar-color: white #598392; 
   
     &::-webkit-scrollbar {
       width: 5px; 
     }
     &::-webkit-scrollbar-thumb {
-      background-color: #888; 
+      background-color: white; 
       border-radius: 5px; 
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #C1D3DF; 
+      background-color: #598392; 
     }
 }
 
 button {
-    background-color: blue !important;
+    background-color: #598392 !important;
     border: none;
     padding: 5px;
+    color: white;
     transition: all 0.3s linear;
     width: 200px;
     cursor: pointer;
@@ -72,13 +84,13 @@ button {
  }
 
  .chat-box{
-    color: rgb(61, 61, 61)!important;
+    color: white !important;
  }
  
  button:hover {
      transition: all 0.3s linear;
-     color: white !important;
-     background: rgb(0, 0, 66) !important;
+     color: black !important;
+     background: #AEC3B0 !important;
      width: 200px;
      outline: none !important;
      border: none !important;

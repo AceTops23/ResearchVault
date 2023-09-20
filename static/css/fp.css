@@ -5,13 +5,13 @@
 }
 
 body{
-    background: white !important;
+    background: #598392!important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    color: rgb(61, 61, 61)!important
+    color: white !important
 }
 
 img{
@@ -25,22 +25,29 @@ img{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: rgb(61, 61, 61)!important
+    color: #124559 !important
 }
 
 .fp-container {
     padding: 20px;
-    background: rgba(167, 193, 209, 0.7) !important;
-    color: rgb(61, 61, 61)!important;
+    background: #124559!important;
+    color: white !important;
     border: none;
     border-radius: 8px;
     width: 500px;
 }
 
 input{
+    color: white;
     padding: 5px;
     border-radius: 5px;
+    background-color: #627179;
 }
+
+input::placeholder{
+    color: white;
+}
+
 
 .med input{
     border-radius: 5px;
@@ -56,15 +63,21 @@ button{
 
 #fp-search,
 #fp-login{
-    background: blue ;
+    background: #598392 ;
+    color: white;
     transition: all 0.3s linear;
+    border: none !important;
+}
+
+#fp-login{
+    background: #124559;
 }
 
 #fp-search:hover,
 #fp-login:hover{
     transition: all 0.3s linear;
-    background: rgb(0, 0, 66) !important;
-    color: white !important;
+    background: #AEC3B0 !important;
+    color: black !important;
 }
 .btn:focus,
 .btn:active,
