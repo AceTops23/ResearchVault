@@ -8,7 +8,10 @@ document.getElementById('generate').addEventListener('click', function () {
     // Fetch a new abstract
     fetch('/generate_abstract')
       .then(response => response.json())
-      .then(section_texts => {
+      .then(data => {
+          var section_texts = data.section_texts;
+          var average_probability = data.average_probability;
+
           // Get the container where you want to append the sections
           var container = document.getElementById('ajax-container');
 
@@ -37,7 +40,7 @@ document.getElementById('generate').addEventListener('click', function () {
 
           var accuracyDiv = document.createElement('div');
           accuracyDiv.className = 'accuracy';
-          accuracyDiv.textContent = 'Accuracy: XX%'; 
+          accuracyDiv.textContent = 'Accuracy: ' + Math.round(average_probability * 100) + '%'; 
 
           accuracyDiv.style.backgroundColor = 'grey';
           accuracyDiv.style.color = 'black';
