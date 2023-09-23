@@ -728,34 +728,29 @@ def convert_docx_to_imrad_route():
     return jsonify({'converted_file_path': converted_file_path})
 
 
-def split_into_sentences(text):
-    sentences = re.split('(?<=[.!?]) +', text)
-    return sentences
-
 def convert_docx_to_imrad(file_path):
+    """Convert a DOCX file to IMRaD format."""
     try:
+        # Open the DOCX file and extract its text
         doc = Document(file_path)
         doc_text = "\n".join([para.text for para in doc.paragraphs])
         
+        # Clean up the text
         doc_text = clean_text(doc_text)
         
-        # Use sentence boundary detection to split the text into sentences
-        sentences = split_into_sentences(doc_text)
+        # Split the text into chunks of a certain size with overlap
+        chunk_size = 512
+        overlap = 50
+        text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size-overlap)]
         
-        # Alternatively, you can use NLTK, Spacy, or Gensim for sentence boundary detection:
-        # sentences = sent_tokenize(doc_text)
-        # nlp = spacy.load('en_core_web_sm')
-        # doc = nlp(doc_text)
-        # sentences = list(doc.sents)
-        # sentences = split_sentences(doc_text)
-        
+        # Classify each chunk into a section using a BERT model
         section_texts = {section: "" for section in section_names.values()}
         
         batch_size = 10
         threshold = 0.5  # Set the threshold
         
-        for i in range(0, len(sentences), batch_size):
-            batch = sentences[i:i+batch_size]
+        for i in range(0, len(text_chunks), batch_size):
+            batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
             
             with torch.no_grad():
@@ -770,6 +765,7 @@ def convert_docx_to_imrad(file_path):
                     max_prob = F.softmax(outputs.logits[j], dim=0).max().item()
                     
                     if k == 0 and token_text.startswith('##'):
+                        # If the first token is an incomplete word (starts with '##'), look back at the previous chunk to find the complete word
                         prev_chunk_last_word = tokenizer.decode([inputs["input_ids"][j-1][-1].item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
                         token_text = prev_chunk_last_word + token_text[2:]
                     
@@ -782,10 +778,11 @@ def convert_docx_to_imrad(file_path):
                 print(f"Text: {section_texts[current_section]}")
                 print(f"Token: {token_text}")
         
+        # Clean up the section texts and remove unnecessary spaces
         for current_section in section_texts:
-            section_texts[current_section] = clean_text(section_texts[current_section])            
-            section_texts[current_section] = section_texts[current_section].replace(' ##', '')                               
+            section_texts[current_section] = clean_text(section_texts[current_section])                              
         
+        # Convert the section texts into a new DOCX file
         converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.docx')
         
         converted_doc = Document()
