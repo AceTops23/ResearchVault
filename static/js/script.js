@@ -351,13 +351,18 @@ document.getElementById('chapter3').addEventListener('click', function(event) {
   fetch('/get_last_unapproved')
   .then(response => response.json())
   .then(data => {
-      if (data === null) {
-          window.location.href = '/fromdocx';
-      } else if (data && data.abstract) {
-          window.location.href = '/fromdocx';
-      } else {
+      if (data === null || !data.IMRAD) {
+          window.location.href = '/genimrad';
+      } else if (!data.abstract) {
           window.location.href = '/abstract';
+      } else {
+          window.location.href = '/fromdocx';
       }
+  }).catch(error => {
+      // If there's an error (like the database is empty), redirect to 'fromdocx'
+      window.location.href = '/fromdocx';
   });
 });
+
+
 

@@ -1,5 +1,5 @@
 document.getElementById('submit').addEventListener('click', function (event) {
-    event.preventDefault();  // Prevent the form from being submitted normally
+    event.preventDefault();
 
     const title = document.getElementById('title').value;
     const fileInput = document.getElementById('fileInput').files[0];
@@ -24,7 +24,7 @@ document.getElementById('submit').addEventListener('click', function (event) {
     }).then(response => {
         if (response.ok) {
             alert('File uploaded successfully.');
-            window.location.href = "/abstract"; // Redirect to abstract.html
+            window.location.href = "/genimrad";
         } else {
             alert('File upload failed.');
         }
