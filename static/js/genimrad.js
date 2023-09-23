@@ -30,9 +30,7 @@ var quill = new Quill('#editor', {
             .then(response => response.json())
             .then(data => {
                 let text_content = data.text_content; // assuming your server sends the text content with key 'text_content'
-                let quill = new Quill('#editor', {
-                    theme: 'snow'
-                });
+      
                 quill.setText(text_content);
             });
         });
