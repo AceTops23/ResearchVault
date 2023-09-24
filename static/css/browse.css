@@ -8,14 +8,14 @@ body{
     display: flex;
     padding: 10px;
     height: 100vh;
-    color: white !important;
-    background-color: #598392 !important;
+    color: black !important;
+    background-color: white !important;
 }
 
 .container{
     height: 99%;
     border-radius: 5px;
-    background: #124559 !important;
+    background: #C1D3DF!important;
 }
 
 img{
@@ -25,7 +25,7 @@ img{
 
 a{
     text-decoration: none !important;
-    color: white!important;
+    color: black!important;
     font-size: clamp(0.75rem, 0.2813rem + 1.5vw, 1.125rem);
 }
 
@@ -42,18 +42,18 @@ a{
     overflow-y: scroll;
     scrollbar-width: thin; 
   
-    scrollbar-color: white #124559; 
+    scrollbar-color: #C1D3DF white; 
   
     &::-webkit-scrollbar {
       width: 5px; 
     }
     &::-webkit-scrollbar-thumb {
-      background-color: white; 
+      background-color: #C1D3DF; 
       border-radius: 5px; 
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #124559; 
+      background-color: #C1D3DF; 
     }
   }
 
@@ -79,9 +79,9 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 #search-button{
-    background-color: #598392 !important;
+    background-color: white!important;
     border: none !important;
-    color: white !important;
+    color: black !important;
     outline: none !important;
     letter-spacing: 3px;
     transition: all 0.3s linear;
@@ -103,20 +103,20 @@ p{
 }
 
 .dropdown button{
-    background-color: rgba(35, 50, 59, 0.7) !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     outline: none;
     border: none;
 }
 
 .dropdown-menu{
-    background-color: rgba(35, 50, 59, 0.8) !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     backdrop-filter: blur(5px);
     height: 140px;
 }
 
 .dropdown option{
     color: white !important;
-    background-color: rgba(35, 50, 59, 0.8) !important;
+    background: rgba(193, 211, 223, 0.5)!important;
 }
 .browse-filter {
     display: block;
@@ -130,12 +130,12 @@ p{
 #sort-dropdown,
 #year-input-dropdown{
     outline: none !important;
-    background-color: rgba(35, 50, 59, 0) !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     border: none !important;
 }
 
 .dropdown .form-select {
-    background-color: rgba(35, 50, 59, 0) !important;
+    background: rgba(193, 211, 223, 0.5)!important;
 }
 
 @media screen and (max-width: 767px) {
@@ -174,7 +174,7 @@ p{
 /* Add hover effect */
 .browse-item:hover {
     transition: all 0.3s linear;
-    background-color: #598392 !important; /* Change the background color on hover */
+    background-color: #AEC3B0!important; /* Change the background color on hover */
     border-radius: 5px; /* Add rounded corners on hover */
     padding: 5px; /* Add padding on hover to create a clickable area */
     cursor: pointer; /* Change the cursor on hover to indicate it's clickable */

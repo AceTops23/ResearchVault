@@ -4,7 +4,7 @@
 }
 
 body{
-    background-color: #598392 !important;
+    background-color: white !important;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,10 +27,10 @@ i{
 
 
 .container{
-    color: white;
+    color: black;
     padding: 20px;
     height: 95%;
-    background: #124559 !important;
+    background: #C1D3DF !important;
     gap: 20px;
     border-radius: 5px;
 }
@@ -67,8 +67,8 @@ textarea::placeholder{
 }
 
 #submit-publish{
-    color: white !important;
-    background-color: #598392 !important; 
+    color: black !important;
+    background-color: white !important; 
     outline: none;
     border: none;
     box-shadow: none;
@@ -99,5 +99,5 @@ textarea::placeholder{
 
   
 label{
-    color: white !important;
+    color: black !important;
 }

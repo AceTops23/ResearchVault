@@ -5,13 +5,13 @@
 }
 
 body{
-    background: #598392!important;
+    background: white!important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    color: white !important
+    color: black !important
 }
 
 img{
@@ -25,13 +25,13 @@ img{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #124559 !important
+    color: #C1D3DF !important
 }
 
 .fp-container {
     padding: 20px;
-    background: #124559!important;
-    color: white !important;
+    background: #C1D3DF!important;
+    color: black !important;
     border: none;
     border-radius: 8px;
     width: 500px;
@@ -40,6 +40,7 @@ img{
 input{
     color: white;
     padding: 5px;
+    border: none;
     border-radius: 5px;
     background-color: #627179;
 }

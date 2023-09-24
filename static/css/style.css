@@ -5,7 +5,7 @@
     padding: 0;
     font-family: 'Poppins', sans-serif;
     font-size: clamp(0.9375rem, 0.5469rem + 1.25vw, 1.25rem);
-    color: white!important;
+    color: black !important;
 }
 
 body{
@@ -13,7 +13,7 @@ body{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background: #598392!important;
+    background: white !important;
 }
 
 .container{
@@ -21,7 +21,7 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #124559 !important;
+    background: #C1D3DF!important;
     width: 90%;
     height: 90%;
     border-radius: 8px;
@@ -42,8 +42,8 @@ a{
 .right button,
 .right-dropdown button{
     width: 200px;
-    background: #598392!important;
-    color: white !important;
+    background: white!important;
+    color: black !important;
     border: none;
     border-radius: 20px;
     padding: 2px 0;
@@ -66,9 +66,8 @@ a{
 .right button:hover,
 .right-dropdown button:hover{
     transition: all 0.3s linear;
-    color: rgb(0, 0, 0) !important;
+    color: black !important;
     background: #AEC3B0 !important;
-
     border: none;
     
 }
@@ -78,12 +77,11 @@ a{
     position: absolute;
     right: 90px;
     top: 110px;
-    background: #124559 !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     padding: 50px;
     border-radius: 8px;
     backdrop-filter: blur(10px);
     visibility: hidden; 
-    box-shadow: 0px 0px 5px 0px black !important;
 }
 .bx-menu{
     position: absolute;
@@ -150,7 +148,7 @@ a{
     max-width: 100%;
     width: 250px;
     height: 45px;
-    background: #1AB187 !important;
+    background: white !important;
     border: 1px solid black;
     border-radius: 20px;
     padding: 2px 5px;
@@ -166,28 +164,28 @@ a{
 }
 #about{
     border: none !important;
-    background: #598392 !important;
+    background: white !important;
     transition: all 0.3s linear;
     box-sizing: border-box;
 }
 
 #about:hover{
     transition: all 0.3s linear;
-    color: white !important;
+    color: black !important;
     background: #AEC3B0 !important;
     border: none;
 }
 
 #start{
     border: none !important;
-    background: #598392 !important;
+    background: white !important;
     transition: all 0.3s linear;
     box-sizing: border-box;
 }
 
 #start:hover{
     transition: all 0.3s linear;
-    color: white !important;
+    color: black !important;
     background: #AEC3B0 !important;
     border: none;
 }
@@ -207,7 +205,7 @@ a{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #598392 !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     height: 250px;
     width: 350px;
     color: white !important;
@@ -247,13 +245,18 @@ a{
     padding: 2px 0;
     width: 320px;
     border: none;
-    color: white !important;
-    background: Blue !important;
+    color: black !important;
+    background: white !important;
     cursor: pointer;
     letter-spacing: 5px;
     transition: all 0.3s linear;
 }
 
+.login-container button:hover{
+    transition: all 0.3s linear;
+    background: #AEC3B0 !important;
+    color: black;
+}
 
 .login-container p, a{
     font-size: clamp(0.625rem, 0.1563rem + 1.5vw, 1rem);
@@ -265,7 +268,7 @@ a{
 
 /* Signup */ 
 .signup-container{
-    background: #598392 !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     color: white !important;
     height: 300px;
     width: 400px;
@@ -335,10 +338,16 @@ a{
     padding: 10px;
     width: 460px;
     border: none;
-    color: white !important;
-    background: blue !important;
+    color: black !important;
+    background: white !important;
     cursor: pointer;
     font-size: clamp(0.625rem, -0.1563rem + 2.5vw, 1.25rem);
+    transition: all 0.3s linear;
+}
+
+.get-started:hover{
+    transition: all 0.3s linear;
+    background: #AEC3B0 !important;
 }
 
 .poc-container{
@@ -357,7 +366,7 @@ a{
     border: none !important;
     padding: 10px;
     text-align: justify !important;
-    background: #124559 !important;
+    background: rgba(193, 211, 223, 0.5)!important;
     width: 500px !important;
     height: 100px !important;
     color: white !important;
@@ -399,11 +408,11 @@ a{
   .poc-container button {
     width: 200px;
     border: none;
-    color: white !important;
+    color: black !important;
     padding-top: 10px;
     padding-bottom: 10px;
     letter-spacing: 5px;
-    background: #598392 !important;
+    background: white !important;
     cursor: pointer;
     transition: background-color 0.3s linear;
     border-radius: 5px;
@@ -411,7 +420,7 @@ a{
 }
 
 .poc-container button:hover {
-    background: #C6F8E5;
+    background: white !important;
     color: black;
 }
 .poc-container button:hover{

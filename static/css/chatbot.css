@@ -8,12 +8,12 @@ body{
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    background-color: #598392 !important;
-    color: white !important
+    background-color: white!important;
+    color: black !important
 }
 
 header{
-    color: white !important;
+    color: black !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -26,6 +26,7 @@ header{
     display: flex;
     gap: 50px;
     letter-spacing: 3px;
+    color: black !important;
 }
 
 .bx-chevron-left{
@@ -44,19 +45,19 @@ textarea::placeholder{
 }
 a{
     text-decoration: none !important;
-    color: white !important;
+    color: black !important;
   }
  
 
 .container{
-    background: #124559 !important;
+    background: #C1D3DF !important;
     width: 1500px;
     height: 850px;
     border-radius: 8px;
     overflow-y: scroll;
     scrollbar-width: thin; 
   
-    scrollbar-color: white #598392; 
+    scrollbar-color: white #C1D3DF; 
   
     &::-webkit-scrollbar {
       width: 5px; 
@@ -67,15 +68,15 @@ a{
     }
   
     &::-webkit-scrollbar-track {
-      background-color: #598392; 
+      background-color: #C1D3DF; 
     }
 }
 
 button {
-    background-color: #598392 !important;
+    background-color: white !important;
     border: none;
     padding: 5px;
-    color: white;
+    color: black !important;
     transition: all 0.3s linear;
     width: 200px;
     cursor: pointer;

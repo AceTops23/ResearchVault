@@ -11,7 +11,7 @@ body{
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #598392;
+    background-color: white;
 }
 
 button#comment{
@@ -21,7 +21,7 @@ button#comment{
     font-size: 30px;
     padding: none;
     cursor: pointer;
-    color: white;
+    color: black;
     border: none;
     background-color: transparent;
 }
@@ -50,8 +50,8 @@ input::placeholder{
 
 #usercomment{
     margin-top: 5px;
-    background-color: #598392;
-    color: white;
+    background: white!important;
+    color: black;
     border: none;
     cursor: pointer;
     transition: all 0.3s linear;
@@ -66,10 +66,10 @@ input::placeholder{
     border: none;
 }
 .comment-section{
-    color: white;
+    color: black;
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 20px;
+    right: 20px;
     display: flex;
     flex-direction: column;
     border-radius: 8px;
@@ -78,7 +78,7 @@ input::placeholder{
     padding: 20px;
     overflow: auto;
     display: none;
-    background-color: #124559;
+    background: rgba(193, 211, 223, 0.9)!important;
     box-shadow: 0 1px 25px rgba(0,0,0,0.2);
     transition: all 0.3s linear;
     z-index: 99;
@@ -99,7 +99,7 @@ input::placeholder{
 .comment-upper button{
     font-size: 30px;
     background-color: transparent;
-    border: white;
+    border: black;
     margin-left: 140px;
     cursor: pointer;
 }
@@ -109,7 +109,7 @@ input::placeholder{
     align-items: center;
     justify-content: center;
     border: 1px solid #E0E0E0;
-    background-color: #F4f4f4;
+    background-color: #C1D3DF;
     margin: 50px;
 }
 

@@ -36,8 +36,9 @@ a{
 }
 
 #submit{
-    color: white !important;
-    background-color: blue !important; 
+    color: black !important;
+    background-color: white !important; 
+    letter-spacing: 5px;
     outline: none;
     border: none;
     box-shadow: none;
@@ -47,7 +48,7 @@ a{
 
 #submit:hover{
     transition: all 0.3s;
-    background: rgb(0, 0, 66) !important;
+    background: #AEC3B0 !important;
 }
 
 input{

@@ -5,13 +5,13 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #598392 !important;
+    background: white !important;
     font-family: 'Poppins', sans-serif;
 }
 
 a{
     text-decoration: none;
-    color: white !important;
+    color: black !important;
 }
 
 i{  
@@ -26,11 +26,11 @@ i{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    color: white !important;
+    color: black !important;
     align-items: center;
     width: 1300px;
     height: 100%;
-    background: #124559 !important;
+    background: #C1D3DF !important;
     border-radius: 8px;
     padding: 20px;
 }
@@ -42,10 +42,11 @@ i{
 }
 
 button{
+    cursor: pointer;
     font-family: 'Poppins', sans-serif;
     letter-spacing: 3px;
-    color: white !important;
-    background-color: #598392 !important;
+    color: black !important;
+    background-color: white !important;
     padding: 5px;
     border: none !important;
     transition: all 0.3s linear;
@@ -70,7 +71,7 @@ button:hover{
     border: none;
     padding: 10px;
     text-align: justify;
-    background: #124559 !important;
+    background: #C1D3DF !important;
     width: 500px;
     height: 200px;
     color: black;
