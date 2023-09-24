@@ -381,9 +381,6 @@ def upload_abstract_route():
 @app.route('/generate_abstract')
 def generate_abstract():
     """Generate an abstract for the last unapproved record."""
-    # Set the threshold for section selection
-    threshold = 0.4
-    
     print("Starting to generate abstract...")
     
     # Get the last unapproved record from the database
@@ -393,7 +390,7 @@ def generate_abstract():
         print("Record found, processing...")
         
         # Get the path of the document file
-        file_path = record['file_path'] 
+        file_path = record['IMRAD'] 
         
         # Read the document and extract its text
         doc = Document(file_path)
