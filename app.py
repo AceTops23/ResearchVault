@@ -19,8 +19,9 @@ from PyPDF2 import PdfFileReader, PdfFileWriter, PageObject
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
 from werkzeug.utils import secure_filename
 
@@ -740,6 +741,14 @@ def convert_docx_to_imrad(file_path):
         overlap = 50
         text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size-overlap)]
         
+        # Convert the chunks into a bag-of-words representation
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform(text_chunks)
+
+        # Normalize the data to a range between 0 and 1
+        scaler = MinMaxScaler()
+        X_normalized = scaler.fit_transform(X.toarray())
+
         # Classify each chunk into a section using a BERT model
         section_texts = {section: "" for section in section_names.values()}
         

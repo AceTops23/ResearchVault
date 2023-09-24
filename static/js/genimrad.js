@@ -20,7 +20,7 @@ var quill = new Quill('#editor', {
         .then(response => response.json())
         .then(data => {
             let converted_file_path = data.converted_file_path;
-            fetch('/convert_docx_to_text', { // new endpoint to convert .docx to text
+            fetch('/convert_docx_to_text', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -29,7 +29,7 @@ var quill = new Quill('#editor', {
             })
             .then(response => response.json())
             .then(data => {
-                let text_content = data.text_content; // assuming your server sends the text content with key 'text_content'
+                let text_content = data.text_content; 
       
                 quill.setText(text_content);
             });
