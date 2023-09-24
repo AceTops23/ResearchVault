@@ -38,7 +38,7 @@ button{
     padding: 10px;
     cursor: pointer;
     color: black;
-    background-color: white;
+    background-color: #C1D3DF;
     border: none;
     transition: all 0.3s linear;
 }
