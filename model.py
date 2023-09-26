@@ -1,114 +1,399 @@
+"""
+This script preprocesses and trains a model on a dataset with hierarchical text data
+and references to figures and tables.
+"""
+import os
+import io
 import pandas as pd
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
+import pytesseract
+import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report
-import joblib
-from gensim import corpora, models
-from nltk import ne_chunk
+from transformers import BertTokenizer, BertForSequenceClassification, AdamW
+import torch
+from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampler
+from tqdm import tqdm
+from PIL import Image
 
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('maxent_ne_chunker')
-nltk.download('words')
+# Define the path to the Figures and Tables folders
+FIGURES_FOLDER = 'Figures'
+TABLES_FOLDER = 'Tables'
+
+# Ensure that the Figures and Tables folders exist
+if not os.path.exists(FIGURES_FOLDER):
+    os.makedirs(FIGURES_FOLDER)
+
+if not os.path.exists(TABLES_FOLDER):
+    os.makedirs(TABLES_FOLDER)
+
+# Load your dataset from Annotations.csv
+data = pd.read_csv('Annotations.csv')
+
+# Assuming you have two columns 'Subsections' and 'Subsubsections' in your CSV file
+
+data = data[(data['Subsection'] != 'N/A') & (data['Sub subsection'] != 'N/A')]
+
+# Replace all NaN elements with 0s.
+data = data.fillna('missing')
+
+# Split the Subsections and Subsubsections columns into lists of strings
+data['Subsection'] = data['Subsection'].apply(lambda x: x.split(',') if isinstance(x, str) else [x])
+data['Sub subsection'] = data['Sub subsection'].apply(lambda x: x.split(',') if isinstance(x, str) else [x])
+
+# Find the maximum lengths for Subsections and Subsubsections
+max_subsection_length = data['Subsection'].apply(len).max()
+max_subsubsection_length = data['Sub subsection'].apply(len).max()
+
+# Pad the Subsections and Subsubsections columns
+data['Subsection'] = data['Subsection'].apply(lambda x: x + ['<PAD>'] * (max_subsection_length - len(x)))
+data['Sub subsection'] = data['Sub subsection'].apply(lambda x: x + ['<PAD>'] * (max_subsubsection_length - len(x)))
+
+# Convert the DataFrame columns to NumPy arrays
+padded_subsection = np.array(data['Subsection'].tolist())
+padded_subsubsection = np.array(data['Sub subsection'].tolist())
+
+# Create a list of dictionaries with the padded data
+padded_data = [{'Subsection': subsection, 'Subsub section': subsubsection}
+               for subsection, subsubsection in zip(padded_subsection, padded_subsubsection)]
+
+# Print or use the padded_data as needed
+print(padded_data)
+
+# Create a dictionary to map unique titles to dataset IDs
+title_to_id = {title: idx for idx, title in enumerate(data['Title'].unique())}
+
+# Add a new column 'Dataset_ID' to your DataFrame
+data['Dataset_ID'] = data['Title'].map(title_to_id)
+
+# Load the pretrained BERT tokenizer
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+# Define a function to preprocess references to figures and tables
+def preprocess_references(text, figure_reference, table_reference):
+    """
+    Preprocesses text by replacing figure and table references with placeholders.
+
+    Args:
+        text (str): The text to preprocess.
+        figure_reference (str or None): The reference to a figure.
+        table_reference (str or None): The reference to a table.
+
+    Returns:
+        str: The preprocessed text with references replaced by placeholders.
+    """
+    # Convert figure_reference and table_reference to strings if they are not already
+    figure_reference = str(figure_reference)
+    table_reference = str(table_reference)
+
+    # Replace "N/A" with an empty string
+    figure_reference = "" if figure_reference == "N/A" else figure_reference
+    table_reference = "" if table_reference == "N/A" else table_reference
+
+    # Replace figure references with corresponding filenames
+    text = text.replace(figure_reference, f'[FIGURE:{figure_reference}]')
+    # Replace table references with corresponding filenames
+    text = text.replace(table_reference, f'[TABLE:{table_reference}]')
+    return text
 
 
-def load_datasets(csv_files):
-    dfs = []
-    for csv_file in csv_files:
-        df = pd.read_csv(csv_file, encoding='Windows-1252')
-        dfs.append(df)
-    return pd.concat(dfs, ignore_index=True)
+# Define a function to preprocess image files (adjust as needed)
+def preprocess_image(image_path):
+    """
+    Preprocesses an image by loading it from the given path.
 
-def preprocess_text(text):
-    if isinstance(text, str):
-        stop_words = set(stopwords.words('english'))
-        stemmer = PorterStemmer()
-        words = nltk.word_tokenize(text)
-        processed_words = []
-        for word in words:
-            if word.isnumeric():
-                processed_words.append("NUMERIC")
-            else:
-                stemmed_word = stemmer.stem(word)
-                pos_tag = nltk.pos_tag([stemmed_word])[0][1]
-                if pos_tag.startswith('NN'):
-                    processed_words.append(stemmed_word)
-        filtered_words = [word for word in processed_words if word.lower() not in stop_words]
+    Args:
+        image_path (str): The path to the image file.
 
-        # Named Entity Recognition
-        named_entities = ne_chunk(nltk.pos_tag(filtered_words))
-        named_entities_filtered = [ne[0] if isinstance(ne, tuple) else ne for ne in named_entities]
-        
-        named_entities_str = [ne if isinstance(ne, str) else ne[0] for ne in named_entities_filtered if isinstance(ne, (str, tuple))]
-        
-        return " ".join(named_entities_str)  # Convert list of tokens to string
+    Returns:
+        numpy.ndarray or None: The preprocessed image as a NumPy array or None if the file does not exist.
+    """
+    if image_path:
+        # Load and preprocess image
+        image = Image.open(image_path)
+        # Convert the image to a NumPy array
+        image_array = np.array(image)
+        return image_array
     else:
+        return None
+
+# Define a function to preprocess table files (adjust as needed)
+def preprocess_table(tables_path):
+    """
+    Preprocesses a table from a CSV file or PNG image located at the given path.
+
+    Args:
+        table_path (str): The path to the CSV file or PNG image containing the table data.
+
+    Returns:
+        DataFrame or None: The preprocessed table data as a DataFrame or None if the file does not exist.
+    """
+    if table_path:
+        if table_path.endswith('.csv'):
+            # Load and preprocess the table data from a CSV file
+            table_data = pd.read_csv(tables_path)
+        elif table_path.endswith('.png'):
+            # Load and preprocess the table data from a PNG image using OCR
+            try:
+                image = Image.open(tables_path)
+                # Perform OCR to extract text from the image
+                table_text = pytesseract.image_to_string(image)
+                # Convert the extracted text into a DataFrame (adjust as needed)
+                table_data = pd.read_csv(io.StringIO(table_text), delimiter='\t')
+            except Exception as e:
+                print(f"Error processing table image: {e}")
+                table_data = None
+        else:
+            print("Unsupported table format. Supported formats: .csv, .png")
+            table_data = None
+
+        return table_data
+    else:
+        return None
+
+# Handle "N/A" values in text columns
+def preprocess_text(text):
+    """
+    Preprocesses text by replacing "N/A" with an empty string.
+
+    Args:
+        text (str): The text to preprocess.
+
+    Returns:
+        str: The preprocessed text with "N/A" replaced by an empty string.
+    """
+    if text == "N/A":
         return ""
+    return text
+
+# Tokenize and preprocess the hierarchical text data, including references to figures and tables
+max_seq_length = 256  
+
+tokenized_data = []
+
+for _, row in data.iterrows():
+    imrad_section = preprocess_text(row['IMRAD Sections'])
+    subsection = preprocess_text(row['Subsection'])
+    sub_subsection = preprocess_text(row['Sub subsection'])
+    section_content = row['Section Content']
+    figure_filename = str(row['Figure Filename'])  # Ensure it's a string
+    table_filename = str(row['Table Filename'])    # Ensure it's a string
+    figure_reference = preprocess_text(row['Figure Reference'])
+    table_reference = preprocess_text(row['Table Reference'])
+
+    # Load and preprocess the figure (if available)
+    figure_path = None
+    if figure_filename and isinstance(figure_filename, str):
+        figure_path = os.path.join(FIGURES_FOLDER, figure_filename)
+    figure_features = preprocess_image(figure_path) if figure_path and os.path.exists(figure_path) else []
+
+    # Load and preprocess the table (if available)
+    table_path = None
+    if table_filename and isinstance(table_filename, str):
+        table_path = os.path.join(TABLES_FOLDER, table_filename)
+    table_features = preprocess_table(table_path) if table_path and os.path.exists(table_path) else []
+
+    # Handle references to figures and tables by replacing them with placeholders
+    section_content = preprocess_references(section_content, figure_reference, table_reference)
+
+    # Concatenate hierarchical text with appropriate separators
+    full_text = f"{imrad_section} [SEP] {subsection} [SEP] {sub_subsection} [SEP] {section_content}"
+
+    # Tokenize the text
+    encoding = tokenizer.encode_plus(
+        full_text,
+        max_length=max_seq_length,
+        truncation=True,
+        padding='max_length',
+        add_special_tokens=True,  # Add '[CLS]' and '[SEP]'
+        return_attention_mask=True,
+        return_tensors='pt',  # Return PyTorch tensors
+    )
+
+    input_ids = encoding['input_ids']
+    attention_mask = encoding['attention_mask']
 
 
+    # Load and preprocess the figure (if available)
+    figure_path = os.path.join(FIGURES_FOLDER, figure_filename)
+    figure_features = preprocess_image(figure_path) if os.path.exists(figure_path) else []
+
+    # Load and preprocess the table (if available)
+    table_path = os.path.join(TABLES_FOLDER, table_filename)
+    table_features = preprocess_table(table_path) if os.path.exists(table_path) else []
+
+    tokenized_data.append({
+        'input_ids': input_ids,
+        'attention_mask': attention_mask,
+        'figure_features': figure_features,
+        'table_features': table_features,
+        'dataset_id': row['Dataset_ID']
+    })
 
 
-if __name__ == "__main__":
-    # Step 2: Prepare the datasets
-    csv_files = ['dataset/A SYLLABUS GENERATOR FOR THE COLLEGE.csv', 'dataset/A Web-based Announcement Management System via SMS for the College of Computer Studies.csv', 'dataset/Anonymous Restriction Application Using AES Algorithm.csv', 'dataset/Book1AFScan Android File Scanner and Translator with Optical.csv', 'dataset/CCS InfoCast- An Information Dissemination.csv',
-                 'dataset/CCS Online Grading System.csv', 'dataset/CCS ONLINE THESIS MANAGEMENT SYSTEM.csv', 'dataset/Crime Analysis in 4th District of Laguna using JRip Algorithm.csv', 'dataset/eFort AN ELECTRONIC FACULTY PORTFOLIO MANAGEMENT SYSTEM.csv', 'dataset/FEMS  A LAN-BASED STUDENTS EVALUATION ON.csv', 'dataset/Jesus the Saviour Hospital Management Information System.csv', 
-                 'dataset/LSPU CCS PAYMENT.csv', 'dataset/OFFICE MANAGEMENT SOLUTIONS FOR.csv', 'dataset/PORTABLE COOLER.csv', 'dataset/Premiumbikes Lending MangementSystem.csv', 'dataset/SMART EXAM CHECKER USING SPEED UP ROBUST FEATURE (SURF).csv', 'dataset/THERMOELECTRIC BBQ GRILL.csv', 'dataset/VIRUS ATTACK- THE DEVELOPMENT OF.csv', 'dataset/WEB-BASED SYLLABUS MANAGEMENT SYSTEM FOR COLLEGE OF COMPUTER.csv', 
-                 'dataset/THE-DEVELOPMENT-OF-MUNICIPAL-PLANNING-AND-DEVELOPMENT-COORDINATOR-OFFICE-MPDCO.csv', 'dataset/THE-DEVELOPMENT-OF-MDRRMO-REPORT-MANAGEMENT-INFORMATION-SYSTEM.csv', 'dataset/THE-BIBLE-WARRIOR-VIRTUAL-REALITY.csv', 'dataset/TESDA-SCHOOL-DIVISION-PAYROLL-AND-MANAGEMENT-SYSTEM.csv', 'dataset/Sustainable-Livelihood-Program-Management-Information-System-with-SMS-Notification.csv', 
-                 'dataset/SMP-Service-Management-Program-E-Learning-System.csv', 'dataset/SMART-OFFICE-Office-Automation-And-Security-Monitoring-System.csv', 'dataset/SCHOOL-EVENT-ATTENDANCE-MONITORING-SYSTEM-USING-FINGERPRINT-AND-SMS-NOTIFICATION.csv', 'dataset/SaveLIFE-Connecting-Blood-Donors-Mobile-Application.csv', 'dataset/SANTA-CRUZ-WATER-DISTRICT-CUSTOMER-RELATIONSHIP.csv', 
-                 'dataset/RAINFALL-ADVISORY-SYSTEM-WITH-SMS-NOTIFICATION-FOR-MUNICIPAL-DISASTER-RISK-REDUCTION-AND-MANAGEMENT-OFFICE-SANTA-CRUZ-LAGUNA.csv', 'dataset/PINHS-INTERACTIVE-ONLINE-COURSEWARE-FOR-ARALING-PANLIPUNAN-WITH-VIRTUAL-ASSISTANCE.csv', 'dataset/PICK-TAP-AND-SNAP-A-COIN-OPERATED-PHOTO-BOOTH.csv', 'dataset/PICK-TAP-AND-SNAP-A-COIN-OPERATED-PHOTO-BOOTH.csv', 
-                 'dataset/PESO-LAGUNA-INTEGRATED-WEBSITE-WITH-DATA-MAPPING.csv', 'dataset/PDRRMO-INFORMATION-MANAGEMENT-SYSTEM.csv', 'dataset/OSYAID-An-Online-Learning-Management-System-for-Out-of-School.csv', 'dataset/Online-Management-Information-System-for-Girl-Scouts-of-the-Philippines-Laguna-Council.csv', 'dataset/ONLINE-COURSEWARE-OF-DMRMNHS-IN-FILIPINO-SUBJECT.csv', 
-                 'dataset/NSTP-WEB-PORTAL-STUDENT-INFORMATION-MANAGEMENT-SYSTEM-WITH-AUTO-GENERATED-QR-CODE.csv', 'dataset/Nexus-Point-A-College-of-Computer-Studies-Web-Portal.csv', 'dataset/MUNICIPALITY-OF-STA.-CRUZ-SCHOLARSHIP-PROGRAM-VALIDATION-WITH-SMS-NOTIFICATION.csv', 'dataset/TILA-T.L.E.-INTERACTIVE-LEARNING-AID.csv', 'dataset/MUNICIPALITY-OF-MAGDALENA-BILLING-AND-COLLECTION-WITH-METER-READING-APPLICATION-AND-SMS-NOTIFICATION.csv', 
-                 'dataset/Tiwi-Food-Product-Company-Web-based-Human-Resource-Integrated-System.csv', 'dataset/TRIP-SA-LAGUNA-MOBILE-APPLICATION-SYSTEM-TRAVEL-ASSISTANT.csv', 'dataset/A-SALON-PROPRIETORS-SMART-ASSISTANT-SYSTEM.csv', 'dataset/Modernization-Program-for-Kingdom-Plantae-Identification-and-Proper-Care-with-the-Use-of-Mobile-Application-South-East-Asian-Plant.csv', 'dataset/MATRIX-ADVENTURES.csv', 
-                 'dataset/Municipality-of-Santa-Cruz-Public-Cemetery-Record-Management-System-with-SMS-Notification.csv', 'dataset/Municipal-Tricycle-Franchise-Regulatory-Board-and-Business-Permit-Record-Management-System-MTFRBBPRMS.csv', 'dataset/MUNICIPAL-MEDICAL-ASSISTANCE-OFFICE-MEDICATION-MONITORING-SYSTEM-WITH-SMS-NOTIFICATION.csv', 'dataset/LSPU-WEB-BASED-RESEARCH-AND-DEVELOPMENT-MANAGEMENT-SYSTEM.csv', 
-                 'dataset/LSPU-WEB-BASED-RESEARCH-AND-DEVELOPMENT-MANAGEMENT-SYSTEM.csv', 'dataset/LSPU-WEB-BASED-RESEARCH-AND-DEVELOPMENT-MANAGEMENT-SYSTEM.csv', 'dataset/LSPU-WEB-BASED-ISO-RECORD-MANAGEMENT-SYSTEM.csv', 'dataset/LSPU-System-Scholarship-and-Financial-Assistance-Record-Management-System-with-SMS-Announcement-and-Notification.csv', 'dataset/LSPU-STUDENTS-OJT-WEB-PORTAL.csv', 
-                 'dataset/LSPU-SPORTS-EQUIPMENT-MONITORING-SYSTEM-USING-BIOMETRICS-AND-SMS-NOTIFICATION.csv', 'dataset/LSPU-SCC-Physical-Plant-and-Site-Development-Scheduling-Management-System.csv', 'dataset/LSPU-SCC-Asset-Management-System.csv', 'dataset/LPSU-ARCSS-LSPU-Social-Media-with-Thesis-Archive.csv', 'dataset/LDH-InfoKiosk-Laguna-Doctors-Hospital-Information-Kiosk.csv', 
-                 'dataset/LAGUNA-STATE-POLYTECHNIC-UNIVERSITY-STA.CRUZ-CAMPUS-SAFETY-AND-SECURITY-MANAGEMENT-SYSTEM-USING-BARCODE-AND-SMS-TECHNOLOGY.csv', 'dataset/LAGUNA-STATE-POLYTECHNIC-UNIVERSITY-EXTENSION-AND-TRAINING-SERVICES-DOCUMENT-MANAGEMENT-SYSTEM.csv', 'dataset/LAGUNA-STATE-POLYTECHNIC-UNIVERSITY-CS-ONLINE-AN-ONLINE-CLERICAL-SERVICE-SYSTEM-FOR-THE-GUIDANCE-OFFICE.csv', 'dataset/LAGUNA-SHOPPE.csv', 
-                 'dataset/Laguna-GENSERV-Cross-Platform-Web-and-Mobile-Application.csv', 'dataset/LABVIEW-LAN-Based-LSPU-SCC-CCS-Laboratory-Attendance-Monitoring-System-using-Finger-Print-Biometric-Technology.csv', 'dataset/LABVIEW-LAN-Based-LSPU-SCC-CCS-Laboratory-Attendance-Monitoring-System-using-Finger-Print-Biometric-Technology.csv', 'dataset/L-SMS-LSPU-SCC-SYLLABUS-MANAGEMENT-SYSTEM.csv', 
-                 'dataset/JOBS-MANAGEMENT-AND-DISSEMINATION-SYSTEM-USING-SMS-TECHNOLOGY-FOR-PUBLIC-EMPLOYMENT-SERVICE-OFFICE-PESO-AT-SANTA-CRUZ-LAGUNA.csv', 'dataset/ITAid-A-LAN-Based-Courseware-for-College-of-Computer-Studies.csv', 'dataset/INTERGRATION-OF-COOPERATIVES-UNDER-PCDO-LOANING-MANAGEMENT-SYSTEM.csv', 'dataset/Instructional-Materials-IMs-Submission-and-Monitoring-System.csv', 
-                 'dataset/INFORMATION-ASSIMILATION-LEARNING-TOOL-FOR-LUMBAN-NATIONAL-HIGH-SCHOOL.csv', 'dataset/IKNoSS-INTEGRATED-KNOWLEDGE-SUPERVISION-SYSTEM.csv', 'dataset/HUMAN-AR-AUGMENTED-HUMAN-INTERNAL-ORGANS.csv', 'dataset/FELICIANO-DENTAL-CLINIC-MANAGEMENT-SYSTEM-WITH-SMS.csv', 'dataset/FAMS-WEB-BASED-FARM-MONITORING-SYSTEM-WITH-3D-MAPPING-FOR-BRGY.-STA-CLARA-SUR-PILA-LAGUNA.csv', 
-                 'dataset/FAMS-FACULTY-ATTENDANCE-MANAGEMENT-SYSTEM.csv', 'dataset/FACULTY-AVAILABILITY-AND-MONITORING-SYSTEM-USING-SMS-TECHNOLOGY.csv', 'dataset/Eyeguide-An-obstacle-detection-and-avoidance-for-blind-navigation.csv', 'dataset/EXECUTOR-MASSIVE-OPEN-WORLD-ROLE-PLAYING-GAME.csv', 'dataset/EXECUTOR-MASSIVE-OPEN-WORLD-ROLE-PLAYING-GAME.csv', 'dataset/EATSMART-A-SMART-DINING-SYSTEM.csv', 
-                 'dataset/E-STENO-A-MOBILE-STENOGRAPHY.csv', 'dataset/E-Sked-Online-Scheduling-Management-System-of-Provincial-Population-Office-with-SMS-notification.csv', 'dataset/E-Report-Mo-An-Online-Crime-Reporting-System-for-Santa-Cruz-Municipal-Police-Station.csv', 'dataset/E-Mayor-Scheduling-Appointment-System.csv', 'dataset/E-HEALTH-VICTORIA-HEALTH-CENTER-ONLINE.csv', 
-                 'dataset/e-GYNE-MOBILE-APPLICATION-FOR-WOMENS-HEALTH.csv', 'dataset/E-BNS-ONLINE-BARANGAY-NUTRITION-SCHOLAR.csv', 'dataset/DISASTERVILLE-ADROID-GAME.csv', 'dataset/CROSS-PLATFORM-UNIFIED-PRESIDENT-REPORT.csv', 'dataset/Crime-and-Incident-Mapping-of-Bay-Municipal-Police-Station.csv', 'dataset/COP-CCS-OJT-PORTAL.csv', 'dataset/COLLEGE-OF-COMPUTER-STUDIES-FILE-SUBMISSION-KIOSK.csv', 
-                 'dataset/Class-Scheduler-An-Expert-System-Timetabling-for-CCS-Faculty-Members-using.csv', 'dataset/CHECKMATE-A-MOBILE-SCANNING-AND-SCORE-GENERATING-APPLICATION.csv', 'dataset/CCS-RESEARCH-LAB-MONITORING-SYSTEM-WITH-BARCODE-SCANNER.csv', 'dataset/CCS-eBASS-College-of-Computer-Studies-electronic-Bulletin-Announcement-System-using-SMS.csv', 'dataset/CALEMS-CCS-ADVANCE-LABORATORY-ELECTRIC-MANAGEMENT-SYSTEM.csv', 
-                 'dataset/CAIHRMS-COMPUTER-AIDED-INSTRUCTION-FOR-HOTEL-RESERVATION-MANAGEMENT-SYSTEM.csv', 'dataset/Book1THEREPO-A-Thesis-Repository-Android-Based-Application.csv', 'dataset/Book1HR-Online-An-Online-Human-Resource-Management-Information-System-of-Laguna-State-Polytechnic-University-Santa-Cruz-Campus.csv', 'dataset/BAT-Budget-Office-Accounting-Office-Treasury-Office-Monitoring-Record-Management-System-of-Municipality-of-Sta.-Cruz-Laguna.csv', 
-                 'dataset/BAT-Budget-Office-Accounting-Office-Treasury-Office-Monitoring-Record-Management-System-of-Municipality-of-Sta.-Cruz-Laguna.csv', 'dataset/AUTOMATED-CANTEEN-TRANSACTION-AND-GATE-PASS-MONITORING-USING-RFID-OF-ST.-MARYS-MONTESSORI.csv', 'dataset/AUGMENTED-ELEMENT-AN-INTERACTIVE-AUGMENTED-REALITY-GAME-OF-ELEMENTS.csv', 'dataset/ASADO-AUTOMATED-STUDENT-FILE-AND-DOCUMENT-ORGANIZER.csv', 'dataset/ADVANCE-LEARNING-FOR-CCS-SCC-USING-AR-AND-MODULE-SUPPORT.csv']
-    df = load_datasets(csv_files)
+# Split the dataset into train and validation sets
+train_data, val_data = train_test_split(tokenized_data, test_size=0.2, random_state=42)
 
-    # Step 3: Data Preprocessing
-    df["preprocessed_text"] = df["Text"].apply(preprocess_text)
+class CustomDataset(Dataset):
+    """
+    A custom dataset class for loading and processing hierarchical text data with associated features.
 
-    # Step 4: Drop rows with missing values
-    df.dropna(subset=["preprocessed_text", "Label"], inplace=True)
+    Args:
+        data (list): A list of dictionaries containing preprocessed data.
 
-    # Step 5: Topic Modeling
-    
-    texts = df["preprocessed_text"].tolist()
-    tokenized_texts = [text.split() for text in texts] 
-    dictionary = corpora.Dictionary(tokenized_texts)
-    corpus = [dictionary.doc2bow(tokens) for tokens in tokenized_texts]
-    lda_model = models.LdaModel(corpus, id2word=dictionary, num_topics=5, passes=15)
+    Attributes:
+        data (list): The list of preprocessed data dictionaries.
+    """
 
-    
-    vectorizer = TfidfVectorizer()
-    preprocessed_texts = df["preprocessed_text"].tolist()  
-    X = vectorizer.fit_transform(preprocessed_texts) 
-    y = df["Label"]
+    def __init__(self, data):
+        self.data = data
 
-    # Step 7: Model Training
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-    classifier.fit(X_train, y_train)
+    def __len__(self):
+        """
+        Get the number of samples in the dataset.
 
-    # Step 8: Evaluation
-    y_pred = classifier.predict(X_test)
-    report = classification_report(y_test, y_pred)
-    print(report)
+        Returns:
+            int: The number of samples in the dataset.
+        """
+        return len(self.data)
 
-    # Step 9: Saving the Model
-    joblib.dump(classifier, 'trained_model_with_tfidf.joblib')
+    def __getitem__(self, idx):
+        """
+        Get a sample from the dataset.
 
+        Args:
+            idx (int): The index of the sample to retrieve.
+
+        Returns:
+            dict: A dictionary containing input_ids, attention_mask, figure_features, table_features, and dataset_id.
+        """
+        sample = {
+            'input_ids': torch.tensor(self.data[idx]['input_ids']),
+            'attention_mask': torch.tensor(self.data[idx]['attention_mask']),
+            'figure_features': self.data[idx]['figure_features'],
+            'dataset_id': self.data[idx]['dataset_id']
+        }
+
+        # Attempt to load 'table_features' and preprocess it
+        table_features = self.data[idx]['table_features']
+        if table_features is not None:
+            if isinstance(table_features, (pd.DataFrame, list)):
+                # Assuming 'table_features' is either a Pandas DataFrame or a list
+                if isinstance(table_features, pd.DataFrame):
+                    # Convert Pandas DataFrame to a NumPy array
+                    # Handle non-numeric values by converting them to NaN
+                    table_features = table_features.apply(pd.to_numeric, errors='coerce').to_numpy(dtype=np.float32)
+                elif isinstance(table_features, list):
+                    # Convert list elements to float32
+                    # Handle non-numeric values by converting them to NaN
+                    table_features = [pd.to_numeric(item, errors='coerce') for item in table_features]
+                    table_features = np.array(table_features, dtype=np.float32)
+
+                # Convert NumPy array or list to a tensor
+                sample['table_features'] = torch.tensor(table_features)
+            else:
+                raise ValueError(f"'table_features' has an unsupported data type: {type(table_features)}")
+        else:
+            sample['table_features'] = None  # Set it to None if it's not available
+
+        return sample
+
+# Create DataLoaders
+batch_size = 32  # You can adjust this as needed
+train_dataset = CustomDataset(train_data)
+train_sampler = RandomSampler(train_dataset)
+train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch_size)
+
+val_dataset = CustomDataset(val_data)
+val_sampler = SequentialSampler(val_dataset)
+val_dataloader = DataLoader(val_dataset, sampler=val_sampler, batch_size=batch_size)
+
+from transformers import BertForSequenceClassification
+import torch
+
+class HierarchicalBertModel(torch.nn.Module):
+    """
+    A custom hierarchical BERT model for sequence classification.
+
+    Args:
+        num_datasets (int): The number of unique datasets or classes for classification.
+    """
+
+    def __init__(self, num_datasets):
+        super(HierarchicalBertModel, self).__init__()
+        self.bert = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=num_datasets)
+
+    def forward(self, input_ids, attention_mask):
+        """
+        Perform forward pass through the model.
+
+        Args:
+            input_ids (Tensor): Input tensor containing token IDs.
+            attention_mask (Tensor): Input tensor containing attention mask.
+
+        Returns:
+            logits (Tensor): Logits output from the model.
+        """
+        outputs = self.bert(input_ids, attention_mask=attention_mask)
+        return outputs.logits
+
+
+# Initialize the HBM model
+num_datasets = len(data['Title'].unique())
+model = HierarchicalBertModel(num_datasets)
+
+# Define optimizer and loss function
+optimizer = AdamW(model.parameters(), lr=2e-5)
+loss_fn = torch.nn.CrossEntropyLoss()
+
+# Training loop
+num_epochs = 5  # You can adjust this as needed
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
+
+for epoch in range(num_epochs):
+    model.train()
+    total_loss = 0
+
+    for batch in tqdm(train_dataloader, desc=f'Epoch {epoch + 1}', unit=' batches'):
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        dataset_ids = batch['dataset_id'].to(device)
+
+        optimizer.zero_grad()
+        outputs = model(input_ids, attention_mask=attention_mask)
+        loss = loss_fn(outputs, dataset_ids)
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item()
+
+    avg_train_loss = total_loss / len(train_dataloader)
+
+    # Validation
+    model.eval()
+    val_loss = 0
+    val_correct = 0
+
+    for batch in tqdm(val_dataloader, desc=f'Validation', unit=' batches'):
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        dataset_ids = batch['dataset_id'].to(device)
+
+        with torch.no_grad():
+            outputs = model(input_ids, attention_mask=attention_mask)
+            loss = loss_fn(outputs, dataset_ids)
+            val_loss += loss.item()
+
+        # Calculate accuracy
+        preds = torch.argmax(outputs, dim=1)
+        val_correct += (preds == dataset_ids).sum().item()
+
+    avg_val_loss = val_loss / len(val_dataloader)
+    accuracy = val_correct / len(val_data)
+
+    print(f'Epoch {epoch + 1}:')
+    print(f'Training Loss: {avg_train_loss:.4f}')
+    print(f'Validation Loss: {avg_val_loss:.4f}')
+    print(f'Validation Accuracy: {accuracy:.4f}')
+
+# Save the trained model
+torch.save(model.state_dict(), 'hierarchical_bert_model.pth')
