@@ -36,3 +36,7 @@ var quill = new Quill('#editor', {
         });
     });
 });
+
+document.getElementById('submit').addEventListener('click', function() {
+    window.location.href = '/abstract';
+});

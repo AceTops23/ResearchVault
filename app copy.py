@@ -5,12 +5,13 @@ import random
 import re
 import secrets
 import PyPDF2
+import nltk.data
 
 # Third party imports
 from bs4 import BeautifulSoup 
 from collections import Counter
 from docx import Document
-from flask import Flask, jsonify, redirect, render_template, request, session, send_file, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, send_file, url_for, abort
 from joblib import load
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -18,8 +19,9 @@ from PyPDF2 import PdfFileReader, PdfFileWriter, PageObject
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
 from werkzeug.utils import secure_filename
 
@@ -41,7 +43,7 @@ model = load('random_forest.joblib')
 vectorizer = load('tfidf_vectorizer.joblib')
 
 # Setting up BERT model and tokenizer
-model_path = "Models\BERT Model" 
+model_path = "Models/test BERT Model" 
 tokenizer = BertTokenizer.from_pretrained(model_path)
 bert_model = BertForSequenceClassification.from_pretrained(model_path)
 
@@ -347,6 +349,10 @@ def get_last_unapproved_route():
     # Get the last unapproved record from the database
     record = db_connection.get_last_unapproved()
     
+    # If there's no record, return an error
+    if record is None:
+        abort(500, 'No records in database')
+    
     # Return the record as JSON
     return jsonify(record)
 
@@ -376,9 +382,6 @@ def upload_abstract_route():
 @app.route('/generate_abstract')
 def generate_abstract():
     """Generate an abstract for the last unapproved record."""
-    # Set the threshold for section selection
-    threshold = 0.4
-    
     print("Starting to generate abstract...")
     
     # Get the last unapproved record from the database
@@ -388,7 +391,7 @@ def generate_abstract():
         print("Record found, processing...")
         
         # Get the path of the document file
-        file_path = record['file_path'] 
+        file_path = record['IMRAD'] 
         
         # Read the document and extract its text
         doc = Document(file_path)
@@ -702,6 +705,119 @@ def convert_to_imrad_route(item_id):
         # Return an error message if an exception occurs
         return jsonify({"message": "Error converting to IMRAD.", "error": str(e)}), 500
 
+
+@app.route('/convert_docx_to_imrad', methods=['POST'])
+def convert_docx_to_imrad_route():
+    """
+    This route handles POST requests to convert DOCX files to IMRaD format."""
+    # Get the JSON data from the request
+    data = request.get_json()
+    
+    # Extract the file path from the data
+    file_path = data['file_path']
+    
+    # Call the function to convert the DOCX file to IMRaD format
+    converted_file_path = convert_docx_to_imrad(file_path)
+    
+    # Update the database with the path of the converted file
+    db_connection.update_imrad_path(file_path, converted_file_path)
+    
+    # Return the path of the converted file in a JSON object
+    return jsonify({'converted_file_path': converted_file_path})
+
+
+def convert_docx_to_imrad(file_path):
+    """Convert a DOCX file to IMRaD format."""
+    try:
+        # Open the DOCX file and extract its text
+        doc = Document(file_path)
+        doc_text = "\n".join([para.text for para in doc.paragraphs])
+        
+        # Clean up the text
+        doc_text = clean_text(doc_text)
+        
+        # Split the text into chunks of a certain size with overlap
+        chunk_size = 512
+        overlap = 50
+        text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size-overlap)]
+        
+        # Convert the chunks into a bag-of-words representation
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform(text_chunks)
+
+        # Normalize the data to a range between 0 and 1
+        scaler = MinMaxScaler()
+        X_normalized = scaler.fit_transform(X.toarray())
+
+        # Classify each chunk into a section using a BERT model
+        section_texts = {section: "" for section in section_names.values()}
+        
+        batch_size = 10
+        threshold = 0.5  # Set the threshold
+        
+        for i in range(0, len(text_chunks), batch_size):
+            batch = text_chunks[i:i+batch_size]
+            inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+            
+            with torch.no_grad():
+                outputs = bert_model(**inputs)
+                predicted_sections = torch.argmax(outputs.logits, dim=1)
+            
+            for j, input_ids in enumerate(inputs["input_ids"]):
+                current_section = section_names.get(predicted_sections[j].item(), 'Other')
+                
+                for k, token in enumerate(input_ids):
+                    token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                    max_prob = F.softmax(outputs.logits[j], dim=0).max().item()
+                    
+                    if k == 0 and token_text.startswith('##'):
+                        # If the first token is an incomplete word (starts with '##'), look back at the previous chunk to find the complete word
+                        prev_chunk_last_word = tokenizer.decode([inputs["input_ids"][j-1][-1].item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                        token_text = prev_chunk_last_word + token_text[2:]
+                    
+                    if current_section is not None and max_prob >= threshold:
+                        if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                            section_texts[current_section] += ' '
+                        section_texts[current_section] += token_text
+                
+                print(f"Section: {current_section}")
+                print(f"Text: {section_texts[current_section]}")
+                print(f"Token: {token_text}")
+        
+        # Clean up the section texts and remove unnecessary spaces
+        for current_section in section_texts:
+            section_texts[current_section] = clean_text(section_texts[current_section])                              
+        
+        # Convert the section texts into a new DOCX file
+        converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.docx')
+        
+        converted_doc = Document()
+        
+        for section_name, section_text in section_texts.items():
+            converted_doc.add_heading(section_name, level=1)
+            converted_doc.add_paragraph(section_text)
+        
+        converted_doc.save(converted_file_path)
+        
+        print(f"Converted file saved at {converted_file_path}")
+        
+        return converted_file_path
+    
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        
+
+@app.route('/convert_docx_to_text', methods=['POST'])
+def convert_docx_to_text():
+    data = request.get_json()
+    file_path = data['file_path']
+
+    # Open the DOCX file and extract its text
+    doc = Document(file_path)
+    doc_text = "\n".join([para.text for para in doc.paragraphs])
+
+    return jsonify({'text_content': doc_text})
+        
 
 if __name__ == '__main__':
     """Run the Flask app."""
