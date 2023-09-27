@@ -1,0 +1,13 @@
+﻿ATTRIBUTES,DESCRIPTION,VALUES
+PATIENT,Number of Patients,Numerical Values
+SEX,Patient’s Gender,Female and Male
+AGE,Patient’s Age,Numerical Value
+HEIGHT,Height of Patient in cm,Numerical Value
+WEIGHT,Weight of Patient in kg,Numerical Value
+PATIENT_POTASSIUM,Patient’s Potassium Levels,Potassium (mEq/L)
+FOOD LEVEL,Food’s Level Rating,"LOW, SAFE, HIGH"
+CREATININE,Chemical waste in the body,Numerical Value
+EGFR,Estimated Glomerular Filtration Rate,Numerical Value
+FOOD_POTASSIUM,Potassium Rate of Food,Numerical Value
+CKD_STAGE,Chronic Kidney Disease Stage,Numerical Value
+,,
