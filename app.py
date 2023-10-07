@@ -24,6 +24,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from transformers import BertTokenizer, BertForSequenceClassification
 from werkzeug.utils import secure_filename
+from modelload import HierarchicalBERT
 
 # Conditional imports (if any)
 try:
@@ -74,7 +75,7 @@ db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), DB)
 db_connection = DBConnection(db_path)
 
 # Setting OpenAI API key
-openai.api_key = "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"
+openai.api_key = "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"
 
 
 # Flask routes
@@ -726,86 +727,136 @@ def convert_docx_to_imrad_route():
     return jsonify({'converted_file_path': converted_file_path})
 
 
-def convert_docx_to_imrad(file_path):
-    """Convert a DOCX file to IMRaD format."""
+def convert_docx_to_imrad(file_path, model_name="fine_tuned_bert_model.pth"):
     try:
-        # Open the DOCX file and extract its text
+        # Load the state dict
+        print("Loading model state_dict...")
+        state_dict = torch.load(model_name, map_location=torch.device('cpu'))  # Load the model on CPU
+        print("Model state_dict loaded successfully.")
+
+        # Count the number of classes for each level
+        num_imrad_classes = state_dict['bert.classifier.weight'].shape[0]
+        num_subsection_classes = state_dict['subsection_classifier.classifier.weight'].shape[0]
+        num_subsubsection_classes = state_dict['subsubsection_classifier.classifier.weight'].shape[0]
+
+        # Initialize the model
+        print("Initializing the model...")
+        bert_model = HierarchicalBERT(num_imrad_classes, num_subsection_classes, num_subsubsection_classes)
+        print("Model initialized successfully.")
+
+        # Load the state dict into the model
+        print("Loading model state_dict into the model...")
+        bert_model.load_state_dict(state_dict)
+        print("Model state_dict loaded into the model successfully.")
+
         doc = Document(file_path)
         doc_text = "\n".join([para.text for para in doc.paragraphs])
-        
-        # Clean up the text
         doc_text = clean_text(doc_text)
-        
-        # Split the text into chunks of a certain size with overlap
         chunk_size = 512
         overlap = 50
         text_chunks = [doc_text[i:i+chunk_size] for i in range(0, len(doc_text), chunk_size-overlap)]
-        
-        # Convert the chunks into a bag-of-words representation
         vectorizer = CountVectorizer()
         X = vectorizer.fit_transform(text_chunks)
-
-        # Normalize the data to a range between 0 and 1
         scaler = MinMaxScaler()
-        X_normalized = scaler.fit_transform(X.toarray())
 
-        # Classify each chunk into a section using a BERT model
-        section_texts = {section: "" for section in section_names.values()}
-        
+        # Get section names from the model using the new method
+        imrad_labels, subsection_labels, subsubsection_labels = bert_model.get_labels()
+
+        section_texts = {section: "" for section in imrad_labels}
+
+        # Print to check the values
+        print("imrad_labels:", imrad_labels)
+        print("subsection_labels:", subsection_labels)
+        print("subsubsection_labels:", subsubsection_labels)
+
+        # Initialize a dictionary to store section levels
         batch_size = 10
-        threshold = 0.5  # Set the threshold
+        threshold = 0.5
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        print("Tokenizer initialized successfully")
         
+        # Inside the loop where you predict and process sections
+        # Inside the loop where you predict and process sections
         for i in range(0, len(text_chunks), batch_size):
             batch = text_chunks[i:i+batch_size]
             inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
-            
             with torch.no_grad():
-                outputs = bert_model(**inputs)
-                predicted_sections = torch.argmax(outputs.logits, dim=1)
-            
+                imrad_logits, _, _ = bert_model(input_ids=inputs["input_ids"], attention_mask=inputs["attention_mask"])
+                predicted_sections = torch.argmax(imrad_logits, dim=1)
+
             for j, input_ids in enumerate(inputs["input_ids"]):
-                current_section = section_names.get(predicted_sections[j].item(), 'Other')
-                
-                for k, token in enumerate(input_ids):
-                    token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
-                    max_prob = F.softmax(outputs.logits[j], dim=0).max().item()
-                    
-                    if k == 0 and token_text.startswith('##'):
-                        # If the first token is an incomplete word (starts with '##'), look back at the previous chunk to find the complete word
-                        prev_chunk_last_word = tokenizer.decode([inputs["input_ids"][j-1][-1].item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
-                        token_text = prev_chunk_last_word + token_text[2:]
-                    
-                    if current_section is not None and max_prob >= threshold:
-                        if section_texts[current_section] and not section_texts[current_section].endswith(' '):
-                            section_texts[current_section] += ' '
-                        section_texts[current_section] += token_text
-                
-                print(f"Section: {current_section}")
-                print(f"Text: {section_texts[current_section]}")
-                print(f"Token: {token_text}")
-        
-        # Clean up the section texts and remove unnecessary spaces
+                current_section = imrad_labels[predicted_sections[j].item()]
+
+                # Check if it's one of the mandatory IMRAD sections, or if "SUMMARY" exists
+                if current_section in ["INTRODUCTION", "METHODOLOGY", "RESULTS AND DISCUSSION", "RECOMMENDATION"] or ("SUMMARY" in section_texts):
+                    for k, token in enumerate(input_ids):
+                        token_text = tokenizer.decode([token.item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                        max_prob = F.softmax(imrad_logits[j], dim=0).max().item()
+                        if k == 0 and token_text.startswith('##'):
+                            prev_chunk_last_word = tokenizer.decode([inputs["input_ids"][j-1][-1].item()], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+                            token_text = prev_chunk_last_word + token_text[2:]
+                        if current_section is not None and max_prob >= threshold:
+                            if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                                section_texts[current_section] += ' '
+                            section_texts[current_section] += token_text
+                        # Check if max_prob is within the expected range
+                        if max_prob >= threshold:
+                            if section_texts[current_section] and not section_texts[current_section].endswith(' '):
+                                section_texts[current_section] += ' '
+                            section_texts[current_section] += token_text
+
+                     # Now, check the shape of predicted_subsections within the same loop
+                    subsection_inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+                    _, subsection_logits, _ = bert_model(input_ids=subsection_inputs["input_ids"], attention_mask=subsection_inputs["attention_mask"])
+                    predicted_subsections = torch.argmax(subsection_logits, dim=1)
+                    print(f"Shape of predicted_subsections: {predicted_subsections.shape}")
+
+                    # Now, check if the current section is "METHODOLOGY" or "RESULTS AND DISCUSSION"
+                    if current_section in ["METHODOLOGY", "RESULTS AND DISCUSSION"]:
+                        # Feed the chunk to predict subsection
+                        subsection_inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+                        _, subsection_logits, _ = bert_model(input_ids=subsection_inputs["input_ids"], attention_mask=subsection_inputs["attention_mask"])
+                        predicted_subsections = torch.argmax(subsection_logits, dim=1)
+                        current_subsection = subsection_labels[predicted_subsections[j].item()]
+
+                        # Check if the current subsection is not None and add to its text
+                        if current_subsection is not None:
+                            if section_texts[current_subsection] and not section_texts[current_subsection].endswith(' '):
+                                section_texts[current_subsection] += ' '
+                            section_texts[current_subsection] += token_text
+
+                            # Check if the current section is "METHODOLOGY," then predict sub-subsection
+                            if current_section == "METHODOLOGY":
+                                # Feed the chunk to predict sub-subsection
+                                subsubsection_inputs = tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
+                                _, _, subsubsection_logits = bert_model(input_ids=subsubsection_inputs["input_ids"], attention_mask=subsubsection_inputs["attention_mask"])
+                                predicted_subsubsections = torch.argmax(subsubsection_logits, dim=1)
+                                current_subsubsection = subsubsection_labels[predicted_subsubsections[j].item()]
+
+                                # Check if the current sub-subsection is not None and add to its text
+                                if current_subsubsection is not None:
+                                    if section_texts[current_subsubsection] and not section_texts[current_subsubsection].endswith(' '):
+                                        section_texts[current_subsubsection] += ' '
+                                    section_texts[current_subsubsection] += token_text
+
+                    # Print to check the processed sections
+                    print(f"Section: {current_section}")
+                    print(f"Text: {section_texts[current_section]}")
+                    print(f"Token: {token_text}")
+
         for current_section in section_texts:
-            section_texts[current_section] = clean_text(section_texts[current_section])                              
-        
-        # Convert the section texts into a new DOCX file
+            section_texts[current_section] = clean_text(section_texts[current_section])
         converted_file_path = file_path.replace(os.path.splitext(file_path)[1], '_imrad.docx')
-        
         converted_doc = Document()
-        
         for section_name, section_text in section_texts.items():
             converted_doc.add_heading(section_name, level=1)
             converted_doc.add_paragraph(section_text)
-        
         converted_doc.save(converted_file_path)
-        
         print(f"Converted file saved at {converted_file_path}")
-        
         return converted_file_path
-    
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        
+
 
 @app.route('/convert_docx_to_text', methods=['POST'])
 def convert_docx_to_text():

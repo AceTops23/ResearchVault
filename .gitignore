@@ -72,3 +72,4 @@ Models/test BERT Model/loss_fn.pt
 Models/test BERT Model/pytorch_model.bin
 Models/test BERT Model/optimizer.pt
 Models/test BERT Model/checkpoint.pth
+fine_tuned_bert_model.pth
