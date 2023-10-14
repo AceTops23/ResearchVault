@@ -21,7 +21,6 @@ class HierarchicalBERT(torch.nn.Module):
         # Store the labels used during training
         self.imrad_labels = ["INTRODUCTION", "METHODS", "RESULTS AND DISCUSSION", "RECOMMENDATIONS", "SUMMARY"]
         
-        
         print("IMRAD Labels:", self.imrad_labels)
         
         self.subsection_labels = [

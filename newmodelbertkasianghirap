@@ -1,0 +1,74 @@
+import pandas as pd
+from transformers import BertForSequenceClassification, BertTokenizer
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
+from transformers import AdamW
+import torch
+
+
+# Load the data
+df = pd.read_csv('annotations.csv')
+
+# Group the data by ID and Title to create a single dataset for each unique ID
+datasets = df.groupby(['ID', 'Title'])
+
+# Load the BERT model and tokenizer
+model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=8)  # 8 labels for 8 IMRaD sections
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+# Define a PyTorch Dataset for your data
+class IMRaDDataset(Dataset):
+    def __init__(self, texts, labels, tokenizer):
+        self.texts = texts
+        self.labels = labels
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return len(self.texts)
+
+    def __getitem__(self, idx):
+        text = self.texts[idx]
+        label = self.labels[idx]
+        encoding = self.tokenizer.encode_plus(text, return_tensors='pt', padding='max_length', truncation=True, max_length=512)
+        return { 'input_ids': encoding['input_ids'].flatten(), 'attention_mask': encoding['attention_mask'].flatten(), 'labels': torch.tensor(label) }
+
+# Split your data into training and validation sets
+# Assuming df['Section Content'] contains the text of the documents and df['IMRAD Section ID'] contains the labels
+train_texts, val_texts, train_labels, val_labels = train_test_split(df['Section Content'], df['IMRAD Section ID'], test_size=0.2)
+
+# Create PyTorch Datasets and DataLoaders for your training and validation data
+train_dataset = IMRaDDataset(train_texts, train_labels, tokenizer)
+val_dataset = IMRaDDataset(val_texts, val_labels, tokenizer)
+
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+val_dataloader = DataLoader(val_dataset, batch_size=16)
+
+# Prepare optimizer
+optimizer = AdamW(model.parameters(), lr=1e-5)
+
+# Define the number of epochs
+num_epochs = 3
+
+# Training loop
+for epoch in range(num_epochs):
+    # Training
+    model.train()
+    for batch in train_dataloader:
+        optimizer.zero_grad()
+        input_ids = batch['input_ids']
+        attention_mask = batch['attention_mask']
+        labels = batch['labels']
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+        loss = outputs.loss
+        loss.backward()
+        optimizer.step()
+
+    # Validation
+    model.eval()
+    for batch in val_dataloader:
+        with torch.no_grad():
+            input_ids = batch['input_ids']
+            attention_mask = batch['attention_mask']
+            labels = batch['labels']
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+            val_loss = outputs.loss
